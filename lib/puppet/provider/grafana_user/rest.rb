@@ -96,8 +96,21 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
     #Puppet.debug "POST org/users PARAMS = "+params.inspect
     response = self.class.http_post('admin/users', params)
     
-    #TODO POST orgs/:id/users => { ??? }
-    
+    # Link to Organisation
+    resource[:organisations].each do |neworg, newrole|
+      orgId = self.class.genericLookup('orgs', 'name', neworg, 'id').to_s
+        
+      #Puppet.debug "Switch context: ORG = "+orgId
+      self.class.http_post("user/using/"+orgId)
+                  
+      params = { 
+        :loginOrEmail => resource[:login],
+        :role         => newrole.capitalize,
+      }
+          
+      #Puppet.debug "POST orgs/#{orgId}/users/#{@property_hash[:id]} - PARAMS = "+params.inspect
+      response = self.class.http_post_json("orgs/#{orgId}/users", params) 
+    end    
   end
 
   def deleteUser
@@ -105,8 +118,6 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
       
     #Puppet.debug "DELETE admin/users/#{@property_hash[:id]}"
     response = self.class.http_delete("admin/users/#{@property_hash[:id]}")    
-    
-    #TODO DELETE orgs/:id/users/:id
   end
   
   def updateUser
