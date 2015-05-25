@@ -40,15 +40,40 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
      
     result
   end
+  
+  def self.getObject(id)
+    list = get_objects('users')    
+    if list != nil      
+      list.each do |object|        
+        if object["id"] == id
+          return getUser(object)
+        end
+      end
+    end
+    
+    raise "Could not retrieve user "+@property_hash[:id] 
+  end
     
   def self.getUser(object)   
     if object["login"] != nil 
+      organisations = Hash.new
+      
+      list = get_objects("users/#{object["id"]}/orgs") 
+      if list != nil      
+        list.each do |object|          
+          organisation = genericLookup('orgs', 'id', object["orgId"], 'name')   
+          organisations[organisation] = object["role"].downcase
+        end       
+      end
+      organisations.sort_by { |name, role| name }
+      
       {
         :name           => object["name"],  
         :email          => object["email"],    
         :login          => object["login"],   
         :is_admin       => object["isAdmin"],  
-          
+        :organisations  => organisations,
+        
         :id             => object["id"],     
         
         :ensure         => :present
@@ -59,17 +84,20 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
   # TYPE SPECIFIC    
   private
   def createUser
-    #Puppet.debug "Create User "+resource[:name]
+    Puppet.debug "Create User "+resource[:name]
                 
-      params = {         
-        :name     => resource[:name],
-        :email    => resource[:email],
-        :login    => resource[:login], 
-        :password => resource[:password],
-      }
-      
-      #Puppet.debug "POST org/users PARAMS = "+params.inspect
-      response = self.class.http_post('admin/users', params)
+    params = {         
+      :name     => resource[:name],
+      :email    => resource[:email],
+      :login    => resource[:login], 
+      :password => resource[:password],
+    }
+    
+    #Puppet.debug "POST org/users PARAMS = "+params.inspect
+    response = self.class.http_post('admin/users', params)
+    
+    #TODO POST orgs/:id/users => { ??? }
+    
   end
 
   def deleteUser
@@ -77,12 +105,16 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
       
     #Puppet.debug "DELETE admin/users/#{@property_hash[:id]}"
     response = self.class.http_delete("admin/users/#{@property_hash[:id]}")    
+    
+    #TODO DELETE orgs/:id/users/:id
   end
   
   def updateUser
-    #Puppet.debug "Update User "+resource[:name]
+    Puppet.debug "Update User "+resource[:name]
+      
+    oldObject = self.class.getObject(@property_hash[:id])
           
-    if @property_hash[:login] != resource[:login] or @property_hash[:email] != resource[:email]
+    if oldObject[:login] != resource[:login] or oldObject[:email] != resource[:email]
       params = {    # name is the ID in Puppet - Can't update that...
         :login          => resource[:login], 
         :email          => resource[:email],
@@ -92,7 +124,7 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
       response = self.class.http_put("users/#{@property_hash[:id]}", params)  
     end  
     
-    if @property_hash[:is_admin] != resource[:is_admin]
+    if oldObject[:is_admin] != resource[:is_admin]
       params = {
         :isGrafanaAdmin => resource[:is_admin],        
       }
@@ -100,5 +132,64 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
       #Puppet.debug "PUT users/#{@property_hash[:id]}/permissions PARAMS = "+params.inspect
       response = self.class.http_put("admin/users/#{@property_hash[:id]}/permissions", params)    
     end       
+      
+    if oldObject[:organisations] != resource[:organisations]
+      Puppet.debug "Update organisations for user "+resource[:name]
+        
+      #Delete or update
+      oldObject[:organisations].each do |org, role|
+        found_role = nil
+        resource[:organisations].each do |neworg, newrole|
+          if neworg == org
+            found_role = newrole
+          end
+        end
+        
+        if found_role == nil
+          orgId = self.class.genericLookup('orgs', 'name', org, 'id').to_s      
+          
+          #Puppet.debug "DELETE orgs/#{orgId}/users/#{@property_hash[:id]}"
+          response = self.class.http_delete("orgs/#{orgId}/users/#{@property_hash[:id]}") 
+        else  
+          if found_role != role
+            orgId = self.class.genericLookup('orgs', 'name', org, 'id').to_s
+            params = { 
+              :orgId  => orgId, 
+              :userId => @property_hash[:id], 
+              :email  => @property_hash[:email], 
+              :login  => @property_hash[:login], 
+              :role   => found_role.capitalize,
+            }
+              
+            #Puppet.debug "PATCH orgs/#{orgId}/users/#{@property_hash[:id]} - PARAMS = "+params.inspect
+            response = self.class.http_patch("orgs/#{orgId}/users/#{@property_hash[:id]}", params) 
+          end
+        end
+      end
+       
+      # Create
+      resource[:organisations].each do |neworg, newrole|
+        found = false
+        oldObject[:organisations].each do |org, role|
+          if neworg == org
+            found = true
+          end
+        end
+        if !found
+          orgId = self.class.genericLookup('orgs', 'name', neworg, 'id').to_s
+          
+          #Puppet.debug "Switch context: ORG = "+orgId
+          self.class.http_post("user/using/"+orgId)
+                    
+          params = { 
+            :loginOrEmail => @property_hash[:login], 
+            :role => newrole.capitalize,
+          }
+            
+          #Puppet.debug "POST orgs/#{orgId}/users/#{@property_hash[:id]} - PARAMS = "+params.inspect
+          response = self.class.http_post_json("orgs/#{orgId}/users", params) 
+        end
+      end
+    end
   end  
 end

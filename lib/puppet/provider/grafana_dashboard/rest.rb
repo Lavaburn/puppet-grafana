@@ -81,7 +81,7 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
     Puppet.debug "Create/Update Dashboard "+resource[:name]
       
     orgId = self.class.genericLookup('orgs', 'name', resource[:organisation], 'id').to_s      
-    Puppet.debug "Switch context: ORG = "+orgId
+    #Puppet.debug "Switch context: ORG = "+orgId
     self.class.http_post("user/using/"+orgId)
     
     dashboard = loadDashboard

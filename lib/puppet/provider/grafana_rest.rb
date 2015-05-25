@@ -105,6 +105,10 @@ class Puppet::Provider::Rest < Puppet::Provider
     http_generic('PUT', url, data)
   end
   
+  def self.http_patch(url, data = {}) 
+    http_generic('PATCH', url, data)
+  end
+  
   def self.http_delete(url) 
     http_generic('DELETE', url)
   end
@@ -137,7 +141,9 @@ class Puppet::Provider::Rest < Puppet::Provider
       when 'POST'        
         response = RestClient.post url, data, headers        
       when 'PUT'
-        response = RestClient.put url, data, headers           
+        response = RestClient.put url, data, headers
+      when 'PATCH'
+        response = RestClient.patch url, data, headers
       when 'DELETE'
         response = RestClient.delete url, headers         
       else
