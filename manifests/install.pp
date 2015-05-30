@@ -24,7 +24,7 @@ class grafana::install {
             ensure   => present,
             provider => 'dpkg',
             source   => '/tmp/grafana.deb',
-            require  => [Wget::Fetch['grafana'],Package['libfontconfig']]
+            require  => [Wget::Fetch['grafana'],Package[$::grafana::fontconfig_package]]
           }
         }
         'RedHat': {
@@ -36,7 +36,7 @@ class grafana::install {
             ensure   => present,
             provider => 'rpm',
             source   => $::grafana::package_source,
-            require  => Package['fontconfig']
+            require  => Package[$::grafana::fontconfig_package]
           }
         }
         default: {
