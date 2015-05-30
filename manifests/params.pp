@@ -16,4 +16,16 @@ class grafana::params {
   $package_name     = 'grafana'
   $service_name     = 'grafana-server'
   $version          = '2.0.2'
+
+  case $::osfamily {
+    'Debian': {
+      $fontconfig_package = 'libfontconfig1'
+    }
+    'RedHat': {
+      $fontconfig_package = 'fontconfig'
+    }
+    default: {
+      fail("${::osfamily} not supported")
+    }
+  }
 }
