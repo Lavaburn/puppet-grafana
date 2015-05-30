@@ -74,7 +74,8 @@ class grafana (
     default           => $::grafana::archive_source
   },
   $service_name     = $::grafana::params::service_name,
-  $version          = $::grafana::params::version
+  $version          = $::grafana::params::version,
+  $fontconfig_package   = $::grafana::params::fontconfig_package,
 ) inherits grafana::params {
 
   # validate parameters here

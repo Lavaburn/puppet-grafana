@@ -11,7 +11,7 @@ class grafana::install {
     'package': {
       case $::osfamily {
         'Debian': {
-          package { 'libfontconfig':
+          package { $::grafana::fontconfig_package:
             ensure => present
           }
 
@@ -19,7 +19,7 @@ class grafana::install {
             source      => $::grafana::package_source,
             destination => '/tmp/grafana.deb'
           }
-          
+
           package { $::grafana::package_name:
             ensure   => present,
             provider => 'dpkg',
@@ -28,7 +28,7 @@ class grafana::install {
           }
         }
         'RedHat': {
-          package { 'fontconfig':
+          package { $::grafana::fontconfig_package:
             ensure => present
           }
 
