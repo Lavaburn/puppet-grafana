@@ -122,6 +122,7 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
 
     params = {    # name is the ID in Puppet - Can't update that...
       :id                 => @property_hash[:id],
+      :orgId              => orgId,
       :name               => resource[:datasource_name], 
       :type               => resource[:type],  
       :access             => resource[:access],  
@@ -135,7 +136,7 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
       :isDefault          => resource[:is_default],  
     }
 
-    #Puppet.debug "POST datasources PARAMS = "+params.inspect
-    response = self.class.http_post("datasources", params)  
+    Puppet.debug "POST datasources PARAMS = "+params.inspect
+    response = self.class.http_post("datasources", params)      # TODO TEST AGAIN !!!
   end  
 end
