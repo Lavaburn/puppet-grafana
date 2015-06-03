@@ -137,7 +137,7 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
     
     if oldObject[:is_admin] != resource[:is_admin]
       params = {
-        :isGrafanaAdmin => resource[:is_admin].to_s,  # Strange validation error        
+        :IsGrafanaAdmin => resource[:is_admin].to_s,  # Strange validation error        
       }
   
       Puppet.debug "PUT users/#{@property_hash[:id]}/permissions PARAMS = "+params.inspect
