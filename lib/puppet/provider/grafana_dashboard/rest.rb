@@ -5,7 +5,9 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
   
   mk_resource_methods
 
-  def flush  
+  def flush      
+    Puppet.warn "Grafana Dashboard - Flush Started"
+      
     if @property_flush[:ensure] == :absent
       deleteDashboard
     elsif @property_flush[:ensure] == :present
@@ -13,6 +15,8 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
     elsif @property_flush[:ensure] == :latest
       createDashboard(true)
     end 
+    
+    Puppet.warn "Flush Failed - ENSURE = "+@property_flush[:ensure]
   end  
 
   def self.instances
