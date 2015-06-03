@@ -23,7 +23,7 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
       return
     end 
     
-    Puppet.debug "Flush Failed - ENSURE = "+@property_flush[:ensure].inspect
+    Puppet.debug "Flush Failed - ENSURE = "+@property_flush[:ensure].inspect    # NIL
   end  
 
   def self.instances

@@ -3,36 +3,38 @@
 Puppet::Type.newtype(:grafana_dashboard) do
   @doc = "Grafana Dashboard"
 
-  ensurable do
-    defaultto :present
-    
-    newvalue(:present)    
-    newvalue(:absent)        
-    newvalue(:latest)
-        
-    def insync?(is)
-      @should.each { |should| 
-        case should
-          when :present
-            return true unless [:absent].include?(is)
-          when :absent
-            return true if is == :absent
-          when :latest
-            return false if is == :absent
-            
-            begin
-              @version = provider.getFileVersion
-            rescue => detail
-              raise "Could not retrieve the file version of the dashboard"
-            end
-                        
-            return (@version == provider.version)
-        end
-      }            
-      false   
-    end
-    
-  end
+#  ensurable do
+#    defaultto :present
+#    
+#    newvalue(:present)    
+#    newvalue(:absent)        
+#    newvalue(:latest)
+#        
+#    def insync?(is)
+#      @should.each { |should| 
+#        case should
+#          when :present
+#            return true unless [:absent].include?(is)
+#          when :absent
+#            return true if is == :absent
+#          when :latest
+#            return false if is == :absent
+#            
+#            begin
+#              @version = provider.getFileVersion
+#            rescue => detail
+#              raise "Could not retrieve the file version of the dashboard"
+#            end
+#                        
+#            return (@version == provider.version)
+#        end
+#      }            
+#      false   
+#    end
+#    
+#  end
+  
+  ensurable
   
   newparam(:name, :namevar => true) do
     desc "The dashboard name. FORMAT = name_organisation"
