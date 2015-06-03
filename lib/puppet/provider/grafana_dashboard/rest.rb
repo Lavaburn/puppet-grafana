@@ -22,7 +22,7 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
     if orgs != nil
       orgs.each do |org|
         orgId = org["id"].to_s
-        #Puppet.debug "DS_PREFETCH - ORG = "+orgId
+        Puppet.debug "DS_PREFETCH - ORG = "+orgId
         
         http_post("user/using/"+orgId)
         
@@ -31,7 +31,7 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
           list.each do |object|            
             map = getDashboard(orgId, object)
             if map != nil
-              #Puppet.debug "Dashboard FOUND for ORG #{orgId}: "+map.inspect
+              Puppet.debug "Dashboard FOUND for ORG #{orgId}: "+map.inspect
               result.push(new(map))
             end  
           end
@@ -81,7 +81,7 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
     Puppet.debug "Create/Update Dashboard "+resource[:name]
       
     orgId = self.class.genericLookup('orgs', 'name', resource[:organisation], 'id').to_s      
-    #Puppet.debug "Switch context: ORG = "+orgId
+    Puppet.debug "Switch context: ORG = "+orgId
     self.class.http_post("user/using/"+orgId)
     
     dashboard = loadDashboard
@@ -91,7 +91,7 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
       :overwrite => overwrite,
     }
     
-    #Puppet.debug "POST dashboards/db PARAMS = "+params.inspect
+    Puppet.debug "POST dashboards/db PARAMS = "+params.inspect
     response = self.class.http_post_json('dashboards/db', params)
   end
 
@@ -99,15 +99,15 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
     Puppet.debug "Delete Dashboard "+resource[:name]
       
     orgId = self.class.genericLookup('orgs', 'name', resource[:organisation], 'id').to_s      
-    #Puppet.debug "Switch context: ORG = "+orgId
+    Puppet.debug "Switch context: ORG = "+orgId
     self.class.http_post("user/using/"+orgId)
     
-    #Puppet.debug "DELETE dashboards/#{@property_hash[:uri]}"
+    Puppet.debug "DELETE dashboards/#{@property_hash[:uri]}"
     response = self.class.http_delete("dashboards/#{@property_hash[:uri]}") 
   end
       
   def loadDashboard
-    #Puppet.debug "Loading Dashboard from file "+resource[:organisation]+"/"+resource[:dashboard_name]
+    Puppet.debug "Loading Dashboard from file "+resource[:organisation]+"/"+resource[:dashboard_name]
       
     rest = self.class.get_rest_info
     folder = rest[:dashboards_folder]
