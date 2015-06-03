@@ -10,13 +10,20 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
       
     if @property_flush[:ensure] == :absent
       deleteDashboard
-    elsif @property_flush[:ensure] == :present
-      createDashboard
-    elsif @property_flush[:ensure] == :latest
+      return
+    end
+    
+    if @property_flush[:ensure] == :present
+      createDashboard(false)
+      return
+    end
+    
+    if @property_flush[:ensure] == :latest
       createDashboard(true)
+      return
     end 
     
-    Puppet.debug "Flush Failed - ENSURE = "+@property_flush[:ensure]
+    Puppet.debug "Flush Failed - ENSURE = "+@property_flush[:ensure].inspect
   end  
 
   def self.instances
@@ -81,7 +88,7 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
   end
   
   private
-  def createDashboard(overwrite = false)
+  def createDashboard(overwrite)
     Puppet.debug "Create/Update Dashboard "+resource[:name]
       
     orgId = self.class.genericLookup('orgs', 'name', resource[:organisation], 'id').to_s      
