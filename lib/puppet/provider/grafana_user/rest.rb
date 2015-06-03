@@ -141,7 +141,7 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
       }
   
       Puppet.debug "PUT users/#{@property_hash[:id]}/permissions PARAMS = "+params.inspect
-      Puppet.warn "Disabled Permission Update for now. API seems broken !!"
+      Puppet.debug "Disabled Permission Update for now. API seems broken !!"
       #response = self.class.http_put("admin/users/#{@property_hash[:id]}/permissions", params)          # TODO TEST !!!
     end       
       
