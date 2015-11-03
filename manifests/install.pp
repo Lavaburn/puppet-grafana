@@ -11,7 +11,7 @@ class grafana::install {
     'package': {
       case $::osfamily {
         'Debian': {
-          package { 'libfontconfig1':
+          package { $::grafana::fontconfig_package:
             ensure => present
           }
 
@@ -24,11 +24,11 @@ class grafana::install {
             ensure   => present,
             provider => 'dpkg',
             source   => '/tmp/grafana.deb',
-            require  => [Wget::Fetch['grafana'],Package['libfontconfig1']]
+            require  => [Wget::Fetch['grafana'],Package[$::grafana::fontconfig_package]]
           }
         }
         'RedHat': {
-          package { 'fontconfig':
+          package { $::grafana::fontconfig_package:
             ensure => present
           }
 
@@ -36,7 +36,7 @@ class grafana::install {
             ensure   => present,
             provider => 'rpm',
             source   => $::grafana::package_source,
-            require  => Package['fontconfig']
+            require  => Package[$::grafana::fontconfig_package]
           }
         }
         default: {
@@ -47,7 +47,7 @@ class grafana::install {
     'repo': {
       case $::osfamily {
         'Debian': {
-          package { 'libfontconfig1':
+          package { $::grafana::fontconfig_package:
             ensure => present
           }
 
@@ -70,11 +70,11 @@ class grafana::install {
 
           package { $::grafana::package_name:
             ensure  => $::grafana::version,
-            require => Package['libfontconfig1']
+            require => Package[$::grafana::fontconfig_package]
           }
         }
         'RedHat': {
-          package { 'fontconfig':
+          package { $::grafana::fontconfig_package:
             ensure => present
           }
 
@@ -91,7 +91,7 @@ class grafana::install {
 
           package { $::grafana::package_name:
             ensure  => "${::grafana::version}-${::grafana::rpm_iteration}",
-            require => Package['fontconfig']
+            require => Package[$::grafana::fontconfig_package]
           }
         }
         default: {
