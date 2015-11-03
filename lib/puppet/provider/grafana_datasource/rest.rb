@@ -95,7 +95,7 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
       :basicAuth          => resource[:basicauth],  
       :basicAuthUser      => resource[:basicauth_user],  
       :basicAuthPassword  => resource[:basicauth_password],  
-      :isDefault          => resource[:is_default],  
+      :isDefault          => resource[:is_default],   # TODO TEST (does not work => no errors given) !!!
     }
     
     #Puppet.debug "PUT datasources PARAMS = "+params.inspect
