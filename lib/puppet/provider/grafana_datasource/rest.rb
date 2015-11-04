@@ -98,8 +98,8 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
       :isDefault          => resource[:is_default],   # TODO TEST (does not work => no errors given) !!!
     }
     
-    #Puppet.debug "PUT datasources PARAMS = "+params.inspect
-    response = self.class.http_put('datasources', params)
+    #Puppet.debug "POST datasources PARAMS = "+params.inspect
+    response = self.class.http_post("datasources", params)
   end
 
   def deleteDatasource
@@ -109,7 +109,7 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
     #Puppet.debug "Switch context: ORG = "+orgId
     self.class.http_post("user/using/"+orgId)
     
-    Puppet.debug "DELETE datasources/#{@property_hash[:id]}"
+    #Puppet.debug "DELETE datasources/#{@property_hash[:id]}"
     response = self.class.http_delete("datasources/#{@property_hash[:id]}")  
   end
   
@@ -136,7 +136,7 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
       :isDefault          => resource[:is_default],           # TODO TEST (does not work => no errors given) !!!
     }
 
-    Puppet.debug "POST datasources PARAMS = "+params.inspect
-    response = self.class.http_post("datasources", params)
+    #Puppet.debug "PUT datasources/#{@property_hash[:id]} PARAMS = "+params.inspect
+    response = self.class.http_put("datasources/#{@property_hash[:id]}", params)
   end  
 end
