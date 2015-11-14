@@ -47,11 +47,11 @@ Puppet::Type.newtype(:grafana_datasource) do
     defaultto false
   end  
   
-  newproperty(:basicauth_user) do
+  newparam(:basicauth_user) do
     desc "HTTP Basic Authentication Username"
   end  
 
-  newproperty(:basicauth_password) do
+  newparam(:basicauth_password) do
     desc "HTTP Basic Authentication Password"
   end
     
