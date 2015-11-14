@@ -104,7 +104,11 @@ class Puppet::Provider::Rest < Puppet::Provider
   def self.http_put(url, data = {}) 
     http_generic('PUT', url, data)
   end
-  
+
+  def self.http_put_json(url, data = {}) 
+    http_generic('PUT', url, data.to_json, true)
+  end
+
   def self.http_patch(url, data = {}) 
     http_generic('PATCH', url, data)
   end

@@ -92,14 +92,14 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
       :user               => resource[:user],  
       :password           => resource[:password],  
       :database           => resource[:database],  
-      :basicAuth          => resource[:basicauth],  
-      :basicAuthUser      => resource[:basicauth_user],  
-      :basicAuthPassword  => resource[:basicauth_password],  
-      :isDefault          => resource[:is_default],   # TODO TEST (does not work => no errors given) !!!
+      :basicAuth          => resource[:basicauth],
+      :basicAuthUser      => resource[:basicauth_user],
+      :basicAuthPassword  => resource[:basicauth_password],
+      :isDefault          => resource[:is_default],
     }
     
     #Puppet.debug "POST datasources PARAMS = "+params.inspect
-    response = self.class.http_post("datasources", params)
+    response = self.class.http_post_json("datasources", params)
   end
 
   def deleteDatasource
@@ -130,13 +130,13 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
       :user               => resource[:user],  
       :password           => resource[:password],  
       :database           => resource[:database],  
-      :basicAuth          => resource[:basicauth],  
-      :basicAuthUser      => resource[:basicauth_user],  
-      :basicAuthPassword  => resource[:basicauth_password],  
-      :isDefault          => resource[:is_default],           # TODO TEST (does not work => no errors given) !!!
+      :basicAuth          => resource[:basicauth],
+      :basicAuthUser      => resource[:basicauth_user],
+      :basicAuthPassword  => resource[:basicauth_password],
+      :isDefault          => resource[:is_default],
     }
 
     #Puppet.debug "PUT datasources/#{@property_hash[:id]} PARAMS = "+params.inspect
-    response = self.class.http_put("datasources/#{@property_hash[:id]}", params)
+    response = self.class.http_put_json("datasources/#{@property_hash[:id]}", params)
   end  
 end
