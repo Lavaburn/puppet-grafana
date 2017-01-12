@@ -96,6 +96,7 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
     self.class.http_post("user/using/"+orgId)
     
     dashboard = loadDashboard
+    dashboard["id"] = nil
     
     params = {         
       :dashboard => dashboard,

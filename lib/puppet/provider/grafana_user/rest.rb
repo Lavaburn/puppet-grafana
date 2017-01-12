@@ -54,7 +54,9 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
     raise "Could not retrieve user "+@property_hash[:id] 
   end
     
-  def self.getUser(object)   
+  def self.getUser(object)  
+    Puppet.debug "User (obj) FOUND: "+object.inspect
+     
     if object["login"] != nil 
       organisations = Hash.new
       
@@ -68,15 +70,13 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
       organisations.sort_by { |name, role| name }
       
       {
+        :ensure         => :present,
+        :id             => object["id"],     
         :name           => object["name"],  
         :email          => object["email"],    
         :login          => object["login"],   
-        :is_admin       => object["isAdmin"],  
-        :organisations  => organisations,
-        
-        :id             => object["id"],     
-        
-        :ensure         => :present
+        :is_admin       => object["isGrafanaAdmin"],  
+        :organisations  => organisations
       }
     end
   end
@@ -96,6 +96,17 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
     #Puppet.debug "POST org/users PARAMS = "+params.inspect
     response = self.class.http_post('admin/users', params)
     user_id = response["id"]
+      
+    # Set Admin (if required)
+    if resource[:is_admin]
+      params = {
+        :isGrafanaAdmin => resource[:is_admin],
+      }
+  
+      Puppet.debug "PUT admin/users/#{@property_hash[:id]}/permissions PARAMS = "+params.inspect
+      response = self.class.http_put("admin/users/#{@property_hash[:id]}/permissions", params)
+      Puppet.debug "PUT permissions RESULT: "+response.inspect
+    end
     
     # Link to Organisation
     resource[:organisations].each do |neworg, newrole|
