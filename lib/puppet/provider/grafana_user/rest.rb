@@ -54,9 +54,7 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
     raise "Could not retrieve user "+@property_hash[:id] 
   end
     
-  def self.getUser(object)  
-    Puppet.debug "User (obj) FOUND: "+object.inspect
-     
+  def self.getUser(object)     
     if object["login"] != nil 
       organisations = Hash.new
       
@@ -75,7 +73,7 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
         :name           => object["name"],  
         :email          => object["email"],    
         :login          => object["login"],   
-        :is_admin       => object["isGrafanaAdmin"],  
+        :is_admin       => object["isAdmin"],  
         :organisations  => organisations
       }
     end
@@ -104,7 +102,7 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
       }
   
       Puppet.debug "PUT admin/users/#{@property_hash[:id]}/permissions PARAMS = "+params.inspect
-      response = self.class.http_put("admin/users/#{@property_hash[:id]}/permissions", params)
+      response = self.class.http_put_json("admin/users/#{@property_hash[:id]}/permissions", params)
       Puppet.debug "PUT permissions RESULT: "+response.inspect
     end
     
@@ -170,7 +168,8 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
       }
   
       Puppet.debug "PUT admin/users/#{@property_hash[:id]}/permissions PARAMS = "+params.inspect
-      response = self.class.http_put("admin/users/#{@property_hash[:id]}/permissions", params)
+      response = self.class.http_put_json("admin/users/#{@property_hash[:id]}/permissions", params)
+      Puppet.debug "PUT permissions RESULT: "+response.inspect
     end       
       
     if oldObject[:organisations] != resource[:organisations]
