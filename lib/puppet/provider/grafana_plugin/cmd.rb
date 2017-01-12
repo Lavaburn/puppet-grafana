@@ -1,5 +1,3 @@
-require File.join(File.dirname(__FILE__), '..', 'grafana_plugin')
-
 Puppet::Type.type(:grafana_plugin).provide :cmd, :parent => Puppet::Provider do
   desc "Provider for Grafana Plugin"
   
@@ -59,5 +57,30 @@ Puppet::Type.type(:grafana_plugin).provide :cmd, :parent => Puppet::Provider do
   
   def uninstallPlugin
     cli('uninstall', resource[:name])
+  end
+  
+  def initialize(value={})
+    super(value)
+    @property_flush = {} 
+  end
+
+  def exists?    
+    @property_hash[:ensure] == :present
+  end
+  
+  def create
+    @property_flush[:ensure] = :present
+  end
+
+  def destroy        
+    @property_flush[:ensure] = :absent
+  end
+     
+  def self.prefetch(resources)        
+    instances.each do |prov|
+      if resource = resources[prov.name]
+       resource.provider = prov
+      end
+    end
   end
 end
