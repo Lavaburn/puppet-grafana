@@ -16,9 +16,11 @@ class grafana::params {
   $ldap_cfg            = false
   $manage_package_repo = true
   $package_name        = 'grafana'
+  $version             = 'present'
   $rpm_iteration       = '1'
+  $apt_os              = 'debian'
+  $apt_release         = 'jessie'
   $service_name        = 'grafana-server'
-  $version             = '2.5.0'
 
   case $::osfamily {
     'Debian': {

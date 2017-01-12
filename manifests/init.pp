@@ -80,11 +80,11 @@ class grafana (
     default           => $archive_source,
   },
   $rpm_iteration       = $::grafana::params::rpm_iteration,
+  $apt_os              = $::grafana::params::apt_os,
+  $apt_release         = $::grafana::params::apt_release,
   $service_name        = $::grafana::params::service_name,
   $version             = $::grafana::params::version,
   $fontconfig_package  = $::grafana::params::fontconfig_package,
-  $apt_os              = $::operatingsystem,
-  $apt_release         = $::lsbdistcodename,
 ) inherits grafana::params {
 
   # validate parameters here

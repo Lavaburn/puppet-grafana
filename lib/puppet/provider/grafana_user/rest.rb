@@ -95,6 +95,7 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
     
     #Puppet.debug "POST org/users PARAMS = "+params.inspect
     response = self.class.http_post('admin/users', params)
+    user_id = response["id"]
     
     # Link to Organisation
     resource[:organisations].each do |neworg, newrole|
@@ -110,7 +111,24 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
           
       #Puppet.debug "POST orgs/#{orgId}/users/#{@property_hash[:id]} - PARAMS = "+params.inspect
       response = self.class.http_post_json("orgs/#{orgId}/users", params) 
-    end    
+    end
+    
+    # By default, the user will get viewer permissions on "Main Org."
+    found = false
+    
+    resource[:organisations].each do |neworg, newrole|
+      if neworg == "Main Org."
+        found = true
+      end
+    end
+    
+    if ! found 
+      # Remove permissions that do not exist
+      orgId = self.class.genericLookup('orgs', 'name', "Main Org.", 'id').to_s  
+      
+      #Puppet.debug "DELETE orgs/#{orgId}/users/#{@property_hash[:id]}"
+      response = self.class.http_delete("orgs/#{orgId}/users/#{user_id}") 
+    end
   end
 
   def deleteUser
@@ -137,7 +155,7 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
     
     if oldObject[:is_admin] != resource[:is_admin]
       params = {
-        :isGrafanaAdmin => resource[:is_admin].to_s,  # Strange validation error
+        :isGrafanaAdmin => resource[:is_admin],
       }
   
       Puppet.debug "PUT admin/users/#{@property_hash[:id]}/permissions PARAMS = "+params.inspect
