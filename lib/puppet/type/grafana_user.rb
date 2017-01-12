@@ -29,6 +29,10 @@ Puppet::Type.newtype(:grafana_user) do
   newproperty(:organisations) do
     desc "A Hash with role per organisation. eg. { 'MyOrg' => 'viewer', 'MyOrg2' => 'editor', 'MyOrg3' => 'admin' }"
   end  
+
+  autorequire(:grafana_organisation) do
+    self[:organisations].keys
+  end
   
   # UNUSED:
     # id

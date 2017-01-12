@@ -137,12 +137,11 @@ Puppet::Type.type(:grafana_user).provide :rest, :parent => Puppet::Provider::Res
     
     if oldObject[:is_admin] != resource[:is_admin]
       params = {
-        :igrafanaadmin => resource[:is_admin].to_s,  # Strange validation error        
+        :isGrafanaAdmin => resource[:is_admin].to_s,  # Strange validation error
       }
   
-      Puppet.debug "PUT users/#{@property_hash[:id]}/permissions PARAMS = "+params.inspect
-      Puppet.debug "Disabled Permission Update for now. API seems broken !!"
-      #response = self.class.http_put("admin/users/#{@property_hash[:id]}/permissions", params)          # TODO TEST !!!
+      Puppet.debug "PUT admin/users/#{@property_hash[:id]}/permissions PARAMS = "+params.inspect
+      response = self.class.http_put("admin/users/#{@property_hash[:id]}/permissions", params)
     end       
       
     if oldObject[:organisations] != resource[:organisations]

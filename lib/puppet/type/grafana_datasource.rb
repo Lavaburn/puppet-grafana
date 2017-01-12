@@ -60,6 +60,10 @@ Puppet::Type.newtype(:grafana_datasource) do
     defaultto false
   end  
   
+  autorequire(:grafana_organisation) do
+    self[:organisation]
+  end
+  
   # UNUSED:
     # id, orgId, jsonData  
 end

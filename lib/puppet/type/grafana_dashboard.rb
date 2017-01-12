@@ -52,6 +52,10 @@ Puppet::Type.newtype(:grafana_dashboard) do
     desc "The dashboard version [READ ONLY]"
   end
   
+  autorequire(:grafana_organisation) do
+    self[:organisation]
+  end
+  
 #  This is managed from file (JSON Dashboard)  
 #  newproperty(:isStarred) do
 #    desc "Whether the dashboard is starred"

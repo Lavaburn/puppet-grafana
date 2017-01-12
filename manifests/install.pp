@@ -1,6 +1,8 @@
 # == Class grafana::install
 #
 class grafana::install {
+  $apt_operating_system = downcase($::grafana::apt_os)
+
   case $::grafana::install_method {
     'docker': {
       docker::image { 'grafana/grafana':
@@ -56,8 +58,8 @@ class grafana::install {
               class { 'apt': }
             }
             apt::source { 'grafana':
-              location => 'https://packagecloud.io/grafana/stable/debian',
-              release  => 'wheezy',
+              location => "https://packagecloud.io/grafana/stable/${apt_operating_system}",
+              release  => $::grafana::apt_release,
               repos    => 'main',
               key      =>  {
                 'id'     => '418A7F2FB0E1E6E7EABF6FE8C2E73424D59097AB',
