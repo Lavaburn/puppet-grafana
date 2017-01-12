@@ -4,7 +4,7 @@ Puppet::Type.newtype(:grafana_plugin) do
   @doc = "Grafana Plugin"
 
   ensurable do
-    defaultvalues
+    #defaultvalues
     defaultto :present
   end
   
