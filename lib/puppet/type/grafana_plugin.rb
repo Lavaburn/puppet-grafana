@@ -3,7 +3,10 @@
 Puppet::Type.newtype(:grafana_plugin) do
   @doc = "Grafana Plugin"
 
-  ensurable
+  ensurable do
+    defaultvalues
+    defaultto :present
+  end
   
   newparam(:name, :namevar => true) do
     desc "The plugin name."

@@ -71,6 +71,7 @@ Puppet::Type.type(:grafana_plugin).provide :cmd, :parent => Puppet::Provider do
       if line =~ /(.*) @ (.*)/
         matchdata = line.match(/(.*) @ (.*)/)
         new({
+          :ensure  => 'present',
           :name    => matchdata[1].gsub(/\s+/, ""),
           :version => matchdata[2].gsub(/\s+/, "")
         })
