@@ -35,6 +35,7 @@ class Puppet::Provider::Cli < Puppet::Provider
     result = %x{grafana-cli plugins #{argList}}
     
     if $?.success?
+      Puppet.debug("grafana-cli returned: #{result}")
       result
     else
       Puppet.warning("grafana-cli returned non-ok result: #{result}")

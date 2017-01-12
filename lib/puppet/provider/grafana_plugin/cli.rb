@@ -34,18 +34,15 @@ Puppet::Type.type(:grafana_plugin).provide :cli, :parent => Puppet::Provider::Cl
       if line =~ /(.*) @ (.*)/
         matchdata = line.match(/(.*) @ (.*)/)
         mapData = {
-          :ensure  => 'present',
+          :ensure  => :present,
           :name    => matchdata[1].gsub(/\s+/, ""),
           :version => matchdata[2].gsub(/\s+/, "")
         }
-        Puppet.debug("mapData = #{mapData}")
-    
-        object = new(mapData)
-        result.push(object)      
+        Puppet.debug("Plugin: #{mapData}")
+
+        result.push(new(mapData))      
       end
     end
-
-    Puppet.debug("result = #{result}")
 
     result
   end
