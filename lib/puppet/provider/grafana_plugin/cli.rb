@@ -6,7 +6,7 @@ Puppet::Type.type(:grafana_plugin).provide :cli, :parent => Puppet::Provider::Cl
   mk_resource_methods
 
   def flush
-    if @property_flush[:ensure] == :absent
+    if @property_flush[:ensure] == :absent or resource[:ensure] == :absent
       uninstallPlugin
     else
       installPlugin
