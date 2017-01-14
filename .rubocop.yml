@@ -17,7 +17,7 @@ RSpec/InstanceVariable:
 # Default is just too small...    
 RSpec/ExampleLength:
   Max: 20
-
+  
 # Style - Documentation
 # TODO: enable (89 offenses)
 Style/Documentation:
@@ -152,4 +152,14 @@ Metrics/PerceivedComplexity:
   Enabled: False
 
 Metrics/CyclomaticComplexity:
+  Enabled: False
+
+# Ensure compatibility with older rubocop gems
+Lint/UnneededDisable:
+  Enabled: False
+
+RSpec/ImplicitExpect:
+  Enabled: False
+  
+RSpec/NestedGroups:
   Enabled: False

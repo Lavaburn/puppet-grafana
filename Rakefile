@@ -23,15 +23,17 @@ end
 
 # PuppetSyntax.exclude_paths = exclude_dirs
 
-desc "Run syntax and lint tests."
+desc "Run syntax and lint tests (for developpers)."
 task :quick_test => [
   :validate,
   :lint,
   :rubocop,
 ]
 
-desc "Run syntax, lint and spec tests."
+desc "Run syntax, lint and spec tests (for Travis and users)."
 task :test => [
-  :quick_test,
+  :validate,
+  :lint,
+  :rubocop, # TODO: REMOVE ON NEXT COMMIT
   :spec
 ]

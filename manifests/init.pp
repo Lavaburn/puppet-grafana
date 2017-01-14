@@ -63,7 +63,7 @@
 #  }
 #
 class grafana (
-  $archive_source      = "https://grafanarel.s3.amazonaws.com/builds/grafana-${version}.linux-x64.tar.gz",
+  $archive_source      = undef,
   $cfg_location        = $::grafana::params::cfg_location,
   $cfg                 = $::grafana::params::cfg,
   $ldap_cfg            = $::grafana::params::ldap_cfg,
@@ -74,11 +74,7 @@ class grafana (
   $install_method      = $::grafana::params::install_method,
   $manage_package_repo = $::grafana::params::manage_package_repo,
   $package_name        = $::grafana::params::package_name,
-  $package_source      = $::osfamily ? {
-    /(RedHat|Amazon)/ => "https://grafanarel.s3.amazonaws.com/builds/grafana-${version}.x86_64.rpm",
-    'Debian'          => "https://grafanarel.s3.amazonaws.com/builds/grafana_${version}_amd64.deb",
-    default           => $archive_source,
-  },
+  $package_source      = undef,
 #  $rpm_iteration       = $::grafana::params::rpm_iteration,
   $apt_os              = $::grafana::params::apt_os,
   $apt_release         = $::grafana::params::apt_release,

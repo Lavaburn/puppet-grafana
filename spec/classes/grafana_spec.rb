@@ -61,10 +61,17 @@ describe 'grafana' do
         :osfamily        => 'Debian',
         :operatingsystem => 'Ubuntu'
       })}
+      
+      let(:version) { '2.6.0' }
+      
+      let(:params) {{ 
+        :version => version
+      }}
 
       download_location = '/tmp/grafana.deb'
 
       describe 'use wget to fetch the package to a temporary location' do
+        it { should contain_wget__fetch('grafana').with_source("https://grafanarel.s3.amazonaws.com/builds/grafana_#{version}_amd64.deb") }
         it { should contain_wget__fetch('grafana').with_destination(download_location) }
         it { should contain_wget__fetch('grafana').that_comes_before('Package[grafana]') }
       end
@@ -84,6 +91,12 @@ describe 'grafana' do
         :osfamily        => 'RedHat',
         :operatingsystem => 'CentOS'
       })}
+      
+      let(:version) { '2.6.0' }
+      
+      let(:params) {{ 
+        :version => version
+      }}
 
       describe 'install dependencies first' do
         it { should contain_package('fontconfig').with_ensure('present').that_comes_before('Package[grafana]') }
@@ -91,6 +104,7 @@ describe 'grafana' do
 
       describe 'install the package' do
         it { should contain_package('grafana').with_provider('rpm') }
+        it { should contain_package('grafana').with_source("https://grafanarel.s3.amazonaws.com/builds/grafana-#{version}.x86_64.rpm") }
       end
     end
   end
@@ -181,8 +195,11 @@ describe 'grafana' do
       :operatingsystem => 'Ubuntu'
     })}
     
+    let(:version) { '2.6.0' }
+    
     let(:params) {{
-      :install_method => 'archive'
+      :install_method => 'archive',
+      :version        => version
     }}
 
     install_dir    = '/usr/share/grafana'
@@ -191,6 +208,7 @@ describe 'grafana' do
     describe 'extract archive to install_dir' do
       it { should contain_archive('/tmp/grafana.tar.gz').with_ensure('present') }
       it { should contain_archive('/tmp/grafana.tar.gz').with_extract_path(install_dir) }
+      it { should contain_archive('/tmp/grafana.tar.gz').with_source("https://grafanarel.s3.amazonaws.com/builds/grafana-#{version}.linux-x64.tar.gz") }
       #TODO: it { should contain_archive('/tmp/grafana.tar.gz').that_comes_before('User[grafana]') }
     end
 

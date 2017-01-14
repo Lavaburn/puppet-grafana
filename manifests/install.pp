@@ -15,8 +15,14 @@ class grafana::install {
             ensure => present
           }
 
+          if ($::grafana::package_source == undef) {
+            $_package_source = "https://grafanarel.s3.amazonaws.com/builds/grafana_${::grafana::version}_amd64.deb"
+          } else {
+            $_package_source = $::grafana::package_source
+          }
+
           wget::fetch { 'grafana':
-            source      => $::grafana::package_source,
+            source      => $_package_source,
             destination => '/tmp/grafana.deb'
           }
 
@@ -32,10 +38,16 @@ class grafana::install {
             ensure => present
           }
 
+          if ($::grafana::package_source == undef) {
+            $_package_source = "https://grafanarel.s3.amazonaws.com/builds/grafana-${::grafana::version}.x86_64.rpm"
+          } else {
+            $_package_source = $::grafana::package_source
+          }
+
           package { $::grafana::package_name:
             ensure   => present,
             provider => 'rpm',
-            source   => $::grafana::package_source,
+            source   => $_package_source,
             require  => Package[$::grafana::fontconfig_package]
           }
         }
@@ -105,9 +117,15 @@ class grafana::install {
     'archive': {
       # create log directory /var/log/grafana (or parameterize)
 
+      if ($::grafana::archive_source == undef) {
+        $_archive_source = "https://grafanarel.s3.amazonaws.com/builds/grafana-${::grafana::version}.linux-x64.tar.gz"
+      } else {
+        $_archive_source = $::grafana::archive_source
+      }
+
       archive { '/tmp/grafana.tar.gz':
         ensure          => present,
-        source          => $::grafana::archive_source,
+        source          => $_archive_source,
         checksum_verify => false,
         extract         => true,
         extract_path    => $::grafana::install_dir,

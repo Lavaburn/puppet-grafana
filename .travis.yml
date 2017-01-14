@@ -1,5 +1,6 @@
 ---
 language: ruby
+cache: bundler
 bundler_args: --without development
 before_install: rm Gemfile.lock || true
 rvm:
@@ -20,7 +21,7 @@ env:
   - PUPPET_VERSION="~> 4.2.0" STRICT_VARIABLES=yes
   - PUPPET_VERSION="~> 4.3.0" STRICT_VARIABLES=yes
   - PUPPET_VERSION="~> 4.4.0" STRICT_VARIABLES=yes
-  #- PUPPET_VERSION="~> 4.5.0" STRICT_VARIABLES=yes
+  - PUPPET_VERSION="~> 4.5.0" STRICT_VARIABLES=yes
   #- PUPPET_VERSION="~> 4.6.0" STRICT_VARIABLES=yes
   #- PUPPET_VERSION="~> 4.7.0" STRICT_VARIABLES=yes
   #- PUPPET_VERSION="~> 4.8.0" STRICT_VARIABLES=yes  
@@ -29,16 +30,27 @@ matrix:
     - rvm: 1.9.3
     - rvm: 2.4.0
     - env: PUPPET_VERSION="~> 3.5.0"
-    - env: PUPPET_VERSION="~> 4.4.0" STRICT_VARIABLES=yes
+    - env: PUPPET_VERSION="~> 3.6.0"
+    - env: PUPPET_VERSION="~> 3.7.0"
+    - env: PUPPET_VERSION="~> 3.8.0"
+    - env: PUPPET_VERSION="~> 4.5.0" STRICT_VARIABLES=yes
   exclude:
   - rvm: 2.0.0
     env: PUPPET_VERSION="~> 3.5.0"
   - rvm: 2.0.0
     env: PUPPET_VERSION="~> 3.6.0"
+  - rvm: 2.0.0
+    env: PUPPET_VERSION="~> 3.7.0"  
+  - rvm: 2.0.0
+    env: PUPPET_VERSION="~> 3.8.0"    
   - rvm: 2.1.10
     env: PUPPET_VERSION="~> 3.5.0"  
   - rvm: 2.1.10
     env: PUPPET_VERSION="~> 3.6.0"
+  - rvm: 2.1.10
+    env: PUPPET_VERSION="~> 3.7.0"  
+  - rvm: 2.1.10
+    env: PUPPET_VERSION="~> 3.8.0"
   - rvm: 2.2.6
     env: PUPPET_VERSION="~> 3.5.0"  
   - rvm: 2.2.6
