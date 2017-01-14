@@ -9,91 +9,82 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
     Puppet.debug "Grafana Dashboard - Flush Started"
       
     if @property_flush[:ensure] == :absent
-      deleteDashboard
+      delete_dashboard
       return
     end
     
-    if @property_flush[:ensure] == :present
-      createDashboard(false)
+    if @property_flush[:ensure] == :present || @property_flush[:ensure] == :latest
+      create_dashboard(false)
       return
     end
-    
-    if @property_flush[:ensure] == :latest
-      createDashboard(true)
-      return
-    end 
-    
-    Puppet.debug "Flush Failed - ENSURE = "+@property_flush[:ensure].inspect    # NIL
+        
+    Puppet.warning "Flush Failed: ensure = " + @property_flush[:ensure].inspect
   end  
 
   def self.instances
-    result = Array.new
+    result = []
         
     orgs = get_objects('orgs')
-    if orgs != nil
+    unless orgs.nil?
       orgs.each do |org|
-        orgId = org["id"].to_s
-        Puppet.debug "DS_PREFETCH - ORG = "+orgId
+        org_id = org["id"].to_s
+        Puppet.debug "DS_PREFETCH - ORG = " + org_id
         
-        http_post("user/using/"+orgId)
+        http_post("user/using/#{org_id}")
         
-        list = get_objects('search')           
-        if list != nil      
-          list.each do |object|            
-            map = getDashboard(orgId, object)
-            if map != nil
-              Puppet.debug "Dashboard FOUND for ORG #{orgId}: "+map.inspect
-              result.push(new(map))
-            end  
-          end
+        list = get_objects('search')          
+        next if list.nil? 
+        
+        list.each do |object|            
+          map = dashboard_from_map(org_id, object)
+          unless map.nil?
+            Puppet.debug "Dashboard FOUND for ORG #{org_id}: "+map.inspect
+            result.push(new(map))
+          end  
         end
-        
       end
     end
     
     result 
   end
 
-  def self.getDashboard(orgId, object)   
-    if object["title"] != nil 
-      organisation = genericLookup('orgs', 'id', orgId.to_i, 'name')
-      
-      dashboard = http_get('dashboards/'+object["uri"])
-      version = dashboard["dashboard"]["version"].to_s
-      #Puppet.debug "Dashboard "+object["title"]+" is version "+version unless version == '0'
-      
-      {
-        :name           => object["title"]+"_"+organisation,
-        :dashboard_name => object["title"],
-        :organisation   => organisation,
-        
-        :version        => version,
-        
-        #:isStarred      => object["isStarred"],    => user-specific!! (should not manage it at all)
-        #:tags           => object["tags"],         => inside dashboard !! (file-based management)
-        
-        #:id             => object["id"],
-        :uri            => object["uri"],
-        #:type           => object["type"],
-          
-        :ensure         => :present
-      }
-    end
+  def self.dashboard_from_map(org_id, object)   
+    return if object["title"].nil?
+    
+    organisation = generic_lookup('orgs', 'id', org_id.to_i, 'name')
+    
+    dashboard = http_get('dashboards/' + object["uri"])
+    version = dashboard["dashboard"]["version"].to_s
+    #Puppet.debug "Dashboard "+object["title"]+" is version "+version unless version == '0'
+    
+    {
+      :name           => object["title"] + "_" + organisation,
+      :dashboard_name => object["title"],
+      :organisation   => organisation,
+      :version        => version, 
+      :uri            => object["uri"],
+      :ensure         => :present
+      #:isStarred      => object["isStarred"],    => user-specific!! (should not manage it at all)
+      #:tags           => object["tags"],         => inside dashboard !! (file-based management)        
+      #:id             => object["id"],
+      #:type           => object["type"], 
+    }
   end
   
   # TYPE SPECIFIC      
-  def getFileVersion
-    dashboard = loadDashboard
-    dashboard['version']
-  end
+#  def file_version
+#    dashboard = load_dashboard
+#    dashboard['version']
+#  end
   
   private
-  def createDashboard(overwrite)
-    Puppet.debug "Create/Update Dashboard "+resource[:name]
+
+  def create_dashboard(overwrite)
+    Puppet.debug "Create/Update Dashboard " + resource[:name]
       
-    orgId = self.class.genericLookup('orgs', 'name', resource[:organisation], 'id').to_s      
-    Puppet.debug "Switch context: ORG = "+orgId
-    self.class.http_post("user/using/"+orgId)
+    org_id = self.class.generic_lookup('orgs', 'name', resource[:organisation], 'id').to_s      
+    Puppet.debug "Switch context: ORG = #{org_id}"
+    self.class.http_post("user/using/#{org_id}")
     
     dashboard = loadDashboard
     dashboard["id"] = nil
@@ -103,30 +94,30 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
       :overwrite => overwrite,
     }
     
-    Puppet.debug "POST dashboards/db PARAMS = "+params.inspect
-    response = self.class.http_post_json('dashboards/db', params)
+    Puppet.debug "POST dashboards/db PARAMS = " + params.inspect
+    self.class.http_post_json('dashboards/db', params)
   end
 
-  def deleteDashboard
+  def delete_dashboard
     Puppet.debug "Delete Dashboard "+resource[:name]
       
-    orgId = self.class.genericLookup('orgs', 'name', resource[:organisation], 'id').to_s      
-    Puppet.debug "Switch context: ORG = "+orgId
-    self.class.http_post("user/using/"+orgId)
+    org_id = self.class.generic_lookup('orgs', 'name', resource[:organisation], 'id').to_s      
+    Puppet.debug "Switch context: ORG = " + org_id
+    self.class.http_post("user/using/" + org_id)
     
     Puppet.debug "DELETE dashboards/#{@property_hash[:uri]}"
-    response = self.class.http_delete("dashboards/#{@property_hash[:uri]}") 
+    self.class.http_delete("dashboards/#{@property_hash[:uri]}") 
   end
       
-  def loadDashboard
-    Puppet.debug "Loading Dashboard from file "+resource[:organisation]+"/"+resource[:dashboard_name]
+  def load_dashboard
+    Puppet.debug "Loading Dashboard from file " + resource[:organisation] + "/" + resource[:dashboard_name]
       
     rest = self.class.get_rest_info
     folder = rest[:dashboards_folder]
-    subfolder = folder+'/'+resource[:organisation]
-    file = subfolder+'/'+resource[:dashboard_name]+'.json'
+    subfolder = folder + '/' + resource[:organisation]
+    file = subfolder + '/' + resource[:dashboard_name]+'.json'
     
-    data = File.read(file) or raise "Could not read dashboard #{resource[:dashboard_name]}.json from #{subfolder}"
-    JSON.load(data)
+    raise "Could not read dashboard #{resource[:dashboard_name]}.json from #{subfolder}" unless (data = File.read(file)) 
+    JSON.parse(data)
   end
 end

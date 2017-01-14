@@ -7,83 +7,81 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
   
   def flush      
     if @property_flush[:ensure] == :present
-      createDatasource
+      create_datasource
       return
     end
           
     if @property_flush[:ensure] == :absent
-      deleteDatasource
+      delete_datasource
       return
     end 
    
-    updateDatasource
+    update_datasource
   end  
 
   def self.instances
-    result = Array.new
+    result = []
     
     orgs = get_objects('orgs')
-    if orgs != nil
+    unless orgs.nil?
       orgs.each do |org|
-        orgId = org["id"].to_s
+        org_id = org["id"].to_s
         #Puppet.debug "DS_PREFETCH - ORG = "+orgId
         
-        http_post("user/using/"+orgId)
+        http_post("user/using/#{org_id}")
         
-        list = get_objects('datasources')           
-        if list != nil      
-          list.each do |object|
-            map = getDatasource(object)
-            if map != nil
-              #Puppet.debug "Datasource FOUND: "+map.inspect
-              result.push(new(map))
-            end  
-          end
-        end
-        
+        list = get_objects('datasources')     
+        next if list.nil?
+                
+        list.each do |object|
+          map = datasource_from_map(object)
+          unless map.nil?
+            #Puppet.debug "Datasource FOUND: "+map.inspect
+            result.push(new(map))
+          end  
+        end        
       end
     end
     
     result 
   end
 
-  def self.getDatasource(object)       
-    if object["name"] != nil    
-      organisation = genericLookup('orgs', 'id', object["orgId"], 'name')
-        
-      {
-        :name               => object["name"]+"_"+organisation,
-        :datasource_name    => object["name"],
-        :type               => object["type"],   
-        :access             => object["access"],   
-        :url                => object["url"],   
-        :user               => object["user"],   
-        :password           => object["password"],   
-        :database           => object["database"],   
-        :basicauth          => object["basicAuth"],   
-        :basicauth_user     => object["basicAuthUser"],   
-        :basicauth_password => object["basicAuthPassword"],   
-        :is_default         => object["isDefault"],   
-        :organisation       => organisation,
-
-        :id                 => object["id"],
-        :orgId              => object["orgId"],
-        :json_data          => object["jsonData"],
-
-        :ensure             => :present
-      }
-    end
+  def self.datasource_from_map(object)       
+    return if object["name"].nil? 
+      
+    organisation = generic_lookup('orgs', 'id', object["orgId"], 'name')
+      
+    {
+      :name               => object["name"]+"_"+organisation,
+      :datasource_name    => object["name"],
+      :type               => object["type"],   
+      :access             => object["access"],   
+      :url                => object["url"],   
+      :user               => object["user"],   
+      :password           => object["password"],   
+      :database           => object["database"],   
+      :basicauth          => object["basicAuth"],   
+      :basicauth_user     => object["basicAuthUser"],   
+      :basicauth_password => object["basicAuthPassword"],   
+      :is_default         => object["isDefault"],   
+      :organisation       => organisation,
+      :id                 => object["id"],
+      :orgId              => object["orgId"],
+      :json_data          => object["jsonData"],
+      :ensure             => :present
+    }
   end
   
   # TYPE SPECIFIC 
   private
-  def createDatasource
-    Puppet.debug "Create Datasource "+resource[:name]
+  
+  def create_datasource
+    Puppet.debug "Create Datasource " + resource[:name]
 
-    orgId = self.class.genericLookup('orgs', 'name', resource[:organisation], 'id').to_s      
-    #Puppet.debug "Switch context: ORG = "+orgId
-    self.class.http_post("user/using/"+orgId)
-                
+    org_id = self.class.generic_lookup('orgs', 'name', resource[:organisation], 'id').to_s      
+    #Puppet.debug "Switch context: ORG = "+org_id
+    self.class.http_post("user/using/#{org_id}")
+
     params = {         
       :name               => resource[:datasource_name], 
       :type               => resource[:type],  
@@ -99,28 +97,29 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
     }
     
     #Puppet.debug "POST datasources PARAMS = "+params.inspect
-    response = self.class.http_post_json("datasources", params)
+    self.class.http_post_json("datasources", params)
   end
 
-  def deleteDatasource
+  def delete_datasource
     Puppet.debug "Delete Datasource "+resource[:name]
 
-    orgId = self.class.genericLookup('orgs', 'name', resource[:organisation], 'id').to_s
-    #Puppet.debug "Switch context: ORG = "+orgId
-    self.class.http_post("user/using/"+orgId)
+    org_id = self.class.generic_lookup('orgs', 'name', resource[:organisation], 'id').to_s
+    #Puppet.debug "Switch context: ORG = "+org_id
+    self.class.http_post("user/using/#{org_id}")
     
     #Puppet.debug "DELETE datasources/#{@property_hash[:id]}"
-    response = self.class.http_delete("datasources/#{@property_hash[:id]}")  
+    self.class.http_delete("datasources/#{@property_hash[:id]}")  
   end
   
-  def updateDatasource
-    Puppet.debug "Update Datasource "+resource[:name]
+  def update_datasource
+    Puppet.debug "Update Datasource " + resource[:name]
       
-    orgId = self.class.genericLookup('orgs', 'name', resource[:organisation], 'id').to_s
-    #Puppet.debug "Switch context: ORG = "+orgId
-    self.class.http_post("user/using/"+orgId)
-
-    params = {    # name is the ID in Puppet - Can't update that...
+    org_id = self.class.generic_lookup('orgs', 'name', resource[:organisation], 'id').to_s
+    #Puppet.debug "Switch context: ORG = "+org_id
+    self.class.http_post("user/using/#{org_id}")
+   
+    # name is the ID in Puppet - Can't update that...
+    params = {
       :id                 => @property_hash[:id],
       :orgId              => orgId,
       :name               => resource[:datasource_name], 
@@ -137,6 +136,6 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
     }
 
     #Puppet.debug "PUT datasources/#{@property_hash[:id]} PARAMS = "+params.inspect
-    response = self.class.http_put_json("datasources/#{@property_hash[:id]}", params)
+    self.class.http_put_json("datasources/#{@property_hash[:id]}", params)
   end  
 end

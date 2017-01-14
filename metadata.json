@@ -1,11 +1,11 @@
 {
-  "name": "bfraser-grafana",
-  "version": "2.5.0",
-  "author": "bfraser",
+  "name": "Lavaburn-grafana",
+  "version": "4.1.0",
+  "author": "Lavaburn",
   "summary": "This module provides Grafana, a dashboard and graph editor for Graphite and InfluxDB.",
-  "license": "Apache 2.0",
-  "source": "git://github.com/bfraser/puppet-grafana.git",
-  "project_page": "https://github.com/bfraser/puppet-grafana",
+  "license": "Apache-2.0",
+  "source": "git://github.com/Lavaburn/puppet-grafana.git",
+  "project_page": "https://github.com/Lavaburn/puppet-grafana",
   "issues_url": "https://github.com/bfraser/puppet-grafana/issues",
   "tags": [
     "grafana",
@@ -16,42 +16,38 @@
   "operatingsystem_support": [
     {
       "operatingsystem": "RedHat",
-      "operatingsystemrelease": [ "6.0" ]
+      "operatingsystemrelease": [ "6.x", "7.x" ]
     },
     {
       "operatingsystem": "CentOS",
-      "operatingsystemrelease": [ "6.0" ]
+      "operatingsystemrelease": [ "6.x", "7.x" ]
     },
     {
       "operatingsystem": "Ubuntu",
-      "operatingsystemrelease": [ "14.04" ]
+      "operatingsystemrelease": [ "12.04", "14.04" ]
     },
     {
       "operatingsystem": "Debian",
-      "operatingsystemrelease": [ "7.0" ]
+      "operatingsystemrelease": [ "6.x", "7.x" ]
     }
   ],
   "requirements": [
     {
-      "name": "pe",
-      "version_requirement": ">= 3.2.0"
-    },
-    {
       "name": "puppet",
-      "version_requirement": ">= 3.4.0"
+      "version_requirement": ">= 3.5.0"
     }
   ],
   "dependencies": [
     {
-      "name": "camptocamp/archive",
-      "version_requirement": ">= 0.3.2 <2.0.0"
+      "name": "puppet-archive",
+      "version_requirement": ">= 1.0.0 <2.0.0"
     },
     {
-      "name": "garethr/docker",
+      "name": "garethr-docker",
       "version_requirement": ">= 3.5.0 <5.0.0"
     },
     {
-      "name": "maestrodev/wget",
+      "name": "maestrodev-wget",
       "version_requirement": ">= 1.6.0 <2.0.0"
     },
     {
@@ -62,6 +58,5 @@
       "name": "puppetlabs-apt",
       "version_requirement": ">=2.0.0 <3.0.0"
     }
-
   ]
 }

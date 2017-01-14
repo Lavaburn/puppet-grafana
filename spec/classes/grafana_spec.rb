@@ -1,13 +1,35 @@
 require 'spec_helper'
 
 describe 'grafana' do
+  let(:generic_facts) {{
+    :kernel         => 'Linux',
+    :path           => '/bin:/usr/bin:/use/local/sbin',
+    :puppetversion  => '4.2.3',
+    :lsbdistrelease => '12.04',
+    :http_proxy     => '',
+    :https_proxy     => '',
+  }}
+  
   context 'supported operating systems' do
     ['Debian', 'RedHat'].each do |osfamily|
       describe "grafana class without any parameters on #{osfamily}" do
-        let(:params) {{ }}
-        let(:facts) {{
-          :osfamily => osfamily,
+        let(:params) {{ 
+          # Default
         }}
+
+        let(:operatingsystem) {
+          case osfamily 
+          when 'Debian' 
+            'Ubuntu'
+          when 'RedHat' 
+            'CentOS'
+          end
+        }
+                
+        let(:facts) {generic_facts.merge({
+          :osfamily        => osfamily,
+          :operatingsystem => operatingsystem,
+        })}
 
         it { should compile.with_all_deps }
 
@@ -24,20 +46,21 @@ describe 'grafana' do
 
   context 'unsupported operating system' do
     describe 'grafana class without any parameters on Solaris/Nexenta' do
-      let(:facts) {{
+      let(:facts) {generic_facts.merge({
         :osfamily        => 'Solaris',
         :operatingsystem => 'Nexenta',
-      }}
+      })}
 
-      it { expect { should contain_package('grafana') }.to raise_error(Puppet::Error, /Nexenta not supported/) }
+      it { expect { should contain_package('grafana') }.to raise_error(Puppet::Error, /Solaris not supported/) }
     end
   end
 
   context 'package install method' do
     context 'debian' do
-      let(:facts) {{
-        :osfamily => 'Debian'
-      }}
+      let(:facts) {generic_facts.merge({
+        :osfamily        => 'Debian',
+        :operatingsystem => 'Ubuntu'
+      })}
 
       download_location = '/tmp/grafana.deb'
 
@@ -57,9 +80,10 @@ describe 'grafana' do
     end
 
     context 'redhat' do
-      let(:facts) {{
-        :osfamily => 'RedHat'
-      }}
+      let(:facts) {generic_facts.merge({
+        :osfamily        => 'RedHat',
+        :operatingsystem => 'CentOS'
+      })}
 
       describe 'install dependencies first' do
         it { should contain_package('fontconfig').with_ensure('present').that_comes_before('Package[grafana]') }
@@ -78,14 +102,15 @@ describe 'grafana' do
     }}
 
     context 'debian' do
-      let(:facts) {{
-        :osfamily => 'Debian',
-        :lsbdistid => 'Ubuntu'
-      }}
+      let(:facts) {generic_facts.merge({
+        :osfamily        => 'Debian',
+        :lsbdistid       => 'Ubuntu',
+        :operatingsystem => 'Ubuntu'
+      })}
 
       describe 'install apt repo dependencies first' do
         it { should contain_class('apt') }
-        it { should contain_apt__source('grafana').with(:release => 'wheezy', :repos => 'main', :location => 'https://packagecloud.io/grafana/stable/debian') }
+        it { should contain_apt__source('grafana').with(:release => 'jessie', :repos => 'main', :location => 'https://packagecloud.io/grafana/stable/debian') }
         it { should contain_apt__source('grafana').that_comes_before('Package[grafana]') }
       end
 
@@ -94,17 +119,23 @@ describe 'grafana' do
       end
 
       describe 'install the package' do
-        it { should contain_package('grafana').with_ensure('2.5.0') }
+        it { should contain_package('grafana').with_ensure('present') }
       end
     end
 
     context 'redhat' do
-      let(:facts) {{
-        :osfamily => 'RedHat'
-      }}
+      let(:facts) {generic_facts.merge({
+        :osfamily        => 'RedHat',
+        :operatingsystem => 'CentOS'
+      })}
 
       describe 'yum repo dependencies first' do
-        it { should contain_yumrepo('grafana').with(:baseurl => 'https://packagecloud.io/grafana/stable/el/6/$basearch', :gpgkey => 'https://packagecloud.io/gpg.key https://grafanarel.s3.amazonaws.com/RPM-GPG-KEY-grafana', :enabled => 1) }
+        it { should contain_yumrepo('grafana').with(
+          :baseurl => 'https://packagecloud.io/grafana/stable/el/6/$basearch', 
+          :gpgkey  => 'https://packagecloud.io/gpg.key https://grafanarel.s3.amazonaws.com/RPM-GPG-KEY-grafana', 
+          :enabled => 1
+        ) 
+        }
         it { should contain_yumrepo('grafana').that_comes_before('Package[grafana]') }
       end
 
@@ -113,23 +144,24 @@ describe 'grafana' do
       end
 
       describe 'install the package' do
-        it { should contain_package('grafana').with_ensure('2.5.0-1') }
+        it { should contain_package('grafana').with_ensure('present') }
       end
     end
   end
 
   context 'repo install method without managing the package repo' do
     let(:params) {{
-      :install_method => 'repo',
+      :install_method      => 'repo',
       :manage_package_repo => false,
-      :version => 'present'
+      :version             => 'present'
     }}
 
     context 'debian' do
-      let(:facts) {{
-        :osfamily => 'Debian',
-        :lsbdistid => 'Ubuntu'
-      }}
+      let(:facts) {generic_facts.merge({
+        :osfamily        => 'Debian',
+        :lsbdistid       => 'Ubuntu',
+        :operatingsystem => 'Ubuntu'
+      })}
 
       it { should compile.with_all_deps }
 
@@ -144,6 +176,11 @@ describe 'grafana' do
   end
 
   context 'archive install method' do
+    let(:facts) {generic_facts.merge({
+      :osfamily        => 'Debian',
+      :operatingsystem => 'Ubuntu'
+    })}
+    
     let(:params) {{
       :install_method => 'archive'
     }}
@@ -152,15 +189,14 @@ describe 'grafana' do
     service_config = '/usr/share/grafana/conf/custom.ini'
 
     describe 'extract archive to install_dir' do
-      it { should contain_archive('grafana').with_ensure('present') }
-      it { should contain_archive('grafana').with_target(install_dir) }
-      it { should contain_archive('grafana').with_strip_components(1) }
-      it { should contain_archive('grafana').that_comes_before('User[grafana]') }
+      it { should contain_archive('/tmp/grafana.tar.gz').with_ensure('present') }
+      it { should contain_archive('/tmp/grafana.tar.gz').with_extract_path(install_dir) }
+      #TODO: it { should contain_archive('/tmp/grafana.tar.gz').that_comes_before('User[grafana]') }
     end
 
     describe 'create grafana user' do
       it { should contain_user('grafana').with_ensure('present').with_home(install_dir) }
-      it { should contain_user('grafana').that_comes_before('File[/usr/share/grafana]') }
+      #TODO: it { should contain_user('grafana').that_comes_before('File[/usr/share/grafana]') }
     end
 
     describe 'manage install_dir' do
@@ -205,11 +241,12 @@ describe 'grafana' do
   end
 
   context 'invalid parameters' do
+    let(:facts) {generic_facts.merge({
+      :osfamily        => 'Debian',
+      :operatingsystem => 'Ubuntu'
+    })}
+    
     context 'cfg' do
-      let(:facts) {{
-        :osfamily => 'Debian',
-      }}
-
       describe 'should raise an error when cfg parameter is not a hash' do
         let(:params) {{
           :cfg => [],
@@ -229,9 +266,10 @@ describe 'grafana' do
   end
 
   context 'configuration file' do
-    let(:facts) {{
-      :osfamily => 'Debian',
-    }}
+    let(:facts) {generic_facts.merge({
+      :osfamily        => 'Debian',
+      :operatingsystem => 'Ubuntu'
+    })}
 
     describe 'should not contain any configuration when cfg param is empty' do
       it { should contain_file('/etc/grafana/grafana.ini').with_content("# This file is managed by Puppet, any changes will be overwritten\n\n") }
@@ -242,31 +280,33 @@ describe 'grafana' do
         :cfg => {
           'app_mode' => 'production',
           'section' => {
-            'string' => 'production',
-            'number' => 8080,
+            'string'  => 'production',
+            'number'  => 8080,
             'boolean' => false,
-            'empty' => '',
+            'empty'   => ''
           },
         },
         :ldap_cfg => {
           'servers' => [
-            { 'host' => 'server1',
-              'use_ssl' => true,
-              'search_filter' => '(sAMAccountName=%s)',
-              'search_base_dns' => [ 'dc=domain1,dc=com' ],
+            { 
+              'host'            => 'server1',
+              'use_ssl'         => true,
+              'search_filter'   => '(sAMAccountName=%s)',
+              'search_base_dns' => ['dc=domain1,dc=com']
             },
-            { 'host' => 'server2',
-              'use_ssl' => true,
-              'search_filter' => '(sAMAccountName=%s)',
-              'search_base_dns' => [ 'dc=domain2,dc=com' ],
+            { 
+              'host'            => 'server2',
+              'use_ssl'         => true,
+              'search_filter'   => '(sAMAccountName=%s)',
+              'search_base_dns' => ['dc=domain2,dc=com']
             },
           ],
           'servers.attributes' => {
-            'name' => 'givenName',
-            'surname' => 'sn',
-            'username' => 'sAMAccountName',
+            'name'      => 'givenName',
+            'surname'   => 'sn',
+            'username'  => 'sAMAccountName',
             'member_of' => 'memberOf',
-            'email' => 'email',
+            'email'     => 'email'
           }
         },
       }}

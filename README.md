@@ -1,7 +1,10 @@
 #grafana
 
+This is a forked module. The original can be found on PuppetForge:
 [![Puppet Forge](http://img.shields.io/puppetforge/v/bfraser/grafana.svg)](https://forge.puppetlabs.com/bfraser/grafana)
-[![Build Status](http://img.shields.io/travis/bfraser/puppet-grafana.svg)](http://travis-ci.org/bfraser/puppet-grafana)
+
+Build Status for this module: 
+[![Build Status](http://img.shields.io/travis/Lavaburn/puppet-grafana.svg)](http://travis-ci.org/Lavaburn/puppet-grafana)
 
 ####Table of Contents
 
@@ -258,6 +261,7 @@ This module has been tested on Ubuntu 14.04, using each of the 'archive', docker
 ##Copyright and License
 
 Copyright (C) 2015 Bill Fraser
+Copyright (C) 2017 Nicolas Truyens <nicolas at truyens dot com>
 
 Bill can be contacted at: fraser@pythian.com
 

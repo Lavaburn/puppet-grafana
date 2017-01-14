@@ -1,8 +1,6 @@
 # == Class grafana::install
 #
 class grafana::install {
-  $apt_operating_system = downcase($::grafana::apt_os)
-
   case $::grafana::install_method {
     'docker': {
       docker::image { 'grafana/grafana':
@@ -53,10 +51,13 @@ class grafana::install {
             ensure => present
           }
 
-          if ( $::grafana::manage_package_repo ){
-            if !defined( Class['apt'] ) {
+          if ($::grafana::manage_package_repo) {
+            $apt_operating_system = downcase($::grafana::apt_os)
+
+            if !defined(Class['apt']) {
               class { 'apt': }
             }
+
             apt::source { 'grafana':
               location => "https://packagecloud.io/grafana/stable/${apt_operating_system}",
               release  => $::grafana::apt_release,
@@ -92,7 +93,7 @@ class grafana::install {
           }
 
           package { $::grafana::package_name:
-            ensure  => "${::grafana::version}-${::grafana::rpm_iteration}",
+            ensure  => $::grafana::version,
             require => Package[$::grafana::fontconfig_package]
           }
         }
@@ -104,20 +105,22 @@ class grafana::install {
     'archive': {
       # create log directory /var/log/grafana (or parameterize)
 
-      archive { 'grafana':
-        ensure           => present,
-        checksum         => false,
-        root_dir         => 'public',
-        strip_components => 1,
-        target           => $::grafana::install_dir,
-        url              => $::grafana::archive_source
+      archive { '/tmp/grafana.tar.gz':
+        ensure          => present,
+        source          => $::grafana::archive_source,
+        checksum_verify => false,
+        extract         => true,
+        extract_path    => $::grafana::install_dir,
+        extract_command => 'tar xfz %s --strip-components=1',
+        creates         => $::grafana::install_dir,
+        cleanup         => true,
       }
 
       if !defined(User['grafana']){
         user { 'grafana':
           ensure  => present,
           home    => $::grafana::install_dir,
-          require => Archive['grafana']
+          require => Archive['/tmp/grafana.tar.gz']
         }
       }
 

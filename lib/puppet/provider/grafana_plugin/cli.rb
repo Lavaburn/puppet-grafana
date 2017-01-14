@@ -6,14 +6,14 @@ Puppet::Type.type(:grafana_plugin).provide :cli, :parent => Puppet::Provider::Cl
   mk_resource_methods
 
   def flush
-    if @property_flush[:ensure] == :absent or resource[:ensure] == :absent
-      uninstallPlugin
+    if @property_flush[:ensure] == :absent || resource[:ensure] == :absent
+      uninstall_plugin
     else
-      installPlugin
+      install_plugin
     end
   end
 
-  def installPlugin
+  def install_plugin
     if resource[:version].nil?
       self.class.cli('install', resource[:name])
     else
@@ -21,27 +21,27 @@ Puppet::Type.type(:grafana_plugin).provide :cli, :parent => Puppet::Provider::Cl
     end  
   end
   
-  def uninstallPlugin
+  def uninstall_plugin
     self.class.cli('uninstall', resource[:name])
   end
   
   def self.instances
     installed = cli('ls')
 
-    result = Array.new
+    result = []
     
     installed.split("\n").each do |line|
-      if line =~ /(.*) @ (.*)/
-        matchdata = line.match(/(.*) @ (.*)/)
-        mapData = {
-          :ensure  => :present,
-          :name    => matchdata[1].gsub(/\s+/, ""),
-          :version => matchdata[2].gsub(/\s+/, "")
-        }
-        Puppet.debug("Plugin: #{mapData}")
+      next unless line =~ /(.*) @ (.*)/
+        
+      matchdata = line.match(/(.*) @ (.*)/)
+      map_data = {
+        :ensure  => :present,
+        :name    => matchdata[1].gsub(/\s+/, ""),
+        :version => matchdata[2].gsub(/\s+/, "")
+      }
+      Puppet.debug("Plugin: #{map_data}")
 
-        result.push(new(mapData))      
-      end
+      result.push(new(map_data))
     end
 
     result

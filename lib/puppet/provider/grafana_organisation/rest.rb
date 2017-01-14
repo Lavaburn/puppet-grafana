@@ -7,20 +7,20 @@ Puppet::Type.type(:grafana_organisation).provide :rest, :parent => Puppet::Provi
 
   def flush  
     if @property_flush[:ensure] == :present
-      createOrganisation
+      create_organisation
       return
     end
           
     if @property_flush[:ensure] == :absent
-      deleteOrganisation
+      delete_organisation
       return
     end 
    
-    updateOrganisation
+    update_organisation
   end  
 
   def self.instances
-    result = Array.new
+    result = []
 
     # Option 1 - Current auth organisation (API Token)
 #    list = Array.new 
@@ -29,10 +29,10 @@ Puppet::Type.type(:grafana_organisation).provide :rest, :parent => Puppet::Provi
     # Option 2 - ALL organisations (requires admin auth)    
     list = get_objects('orgs')
     
-    if list != nil      
+    unless list.nil?
       list.each do |object|
         map = getOrganisation(object)
-        if map != nil
+        unless map.nil?
           #Puppet.debug "Organisation FOUND: "+map.inspect
           result.push(new(map))
         end
@@ -42,41 +42,40 @@ Puppet::Type.type(:grafana_organisation).provide :rest, :parent => Puppet::Provi
     result 
   end
     
-  def self.getOrganisation(object)   
-    if object["name"] != nil 
-      {
-        :name           => object["name"],   
-
-        :id             => object["id"],
-          
-        :ensure         => :present
-      }
-    end
+  def self.get_organisation(object)   
+    return if object["name"].nil? 
+    
+    {
+      :name   => object["name"],   
+      :id     => object["id"],          
+      :ensure => :present
+    }
   end
   
   # TYPE SPECIFIC    
   private
-  def createOrganisation
+  
+  def create_organisation
     #Puppet.debug "Create Organisation "+resource[:name]
     
     params = {         
-      :name     => resource[:name],
+      :name => resource[:name],
     }
     
-    Puppet.debug "POST orgs PARAMS = "+params.inspect
-    response = self.class.http_post('orgs', params)
+    Puppet.debug "POST orgs PARAMS = " + params.inspect
+    self.class.http_post('orgs', params)
   end
 
-  def deleteOrganisation
-    Puppet.debug "Delete Organisation "+resource[:name]
+  def delete_organisation
+    Puppet.debug "Delete Organisation " + resource[:name]
 
     # Unsupported ! 
 #    Puppet.debug "DELETE orgs/#{@property_hash[:id]}"
 #    response = self.class.http_delete("orgs/#{@property_hash[:id]}")    
   end
   
-  def updateOrganisation
-    Puppet.debug "Update Organisation "+resource[:name]
+  def update_organisation
+    Puppet.debug "Update Organisation " + resource[:name]
     
     # Currently not supported as name is used as ID in Puppet
     # Could be used to set/change city, address1, address2

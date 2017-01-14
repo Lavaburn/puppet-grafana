@@ -17,7 +17,7 @@ class grafana::params {
   $manage_package_repo = true
   $package_name        = 'grafana'
   $version             = 'present'
-  $rpm_iteration       = '1'
+#  $rpm_iteration       = '1'
   $apt_os              = 'debian'
   $apt_release         = 'jessie'
   $service_name        = 'grafana-server'

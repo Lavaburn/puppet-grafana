@@ -1,0 +1,155 @@
+require: rubocop-rspec
+
+AllCops:
+  Exclude:
+    - 'spec/fixtures/**/*'
+    - 'vendor/**/*'
+
+# RSpec
+# Puppet is not pure Ruby... 
+RSpec/DescribeClass:
+  Enabled: False
+
+# Role can only be set using instance variable (@role)
+RSpec/InstanceVariable:
+  Enabled: False
+
+# Default is just too small...    
+RSpec/ExampleLength:
+  Max: 20
+
+# Style - Documentation
+# TODO: enable (89 offenses)
+Style/Documentation:
+  Enabled: False
+  
+# Style - Conditional
+# Sounds normal... Hard to resolve
+Style/IfInsideElse:
+  Enabled: False
+
+# Style - Whitespace
+# TODO: enable (54 offenses)
+Style/TrailingBlankLines:
+  Enabled: False
+
+# Style - Hash - Ruby 2.0
+# TODO: enable in future (540 offenses)
+Style/HashSyntax:
+  Enabled: False
+# Should be resolved by the above...
+Style/IndentHash:
+  Enabled: False
+
+# What about alignment? Test with above fixed...
+Style/SpaceAroundOperators:
+  Enabled: False
+
+# Style {} (single-line) vs. do...end (multi-line)
+# TODO: enable in future (604 offenses)
+Style/BlockDelimiters:
+  Enabled: False
+
+# Style - Hash {} is redundant???
+# TODO: enable AFTER changing rspec to facts generic (196 offenses)
+Style/BracesAroundHashParameters:
+  Enabled: False
+
+# TODO: enable AFTER changing rspec to facts generic (164-x offenses)
+Style/SpaceInsideBlockBraces:
+  Enabled: False
+
+# Style - prefer %w(a, b, c) over ['a', 'b', 'c'] 
+# TODO: enable some day (98 offenses)
+Style/WordArray:
+  Enabled: False
+  
+# Style - last item in hash/array should not have a comma (some DSl enforce this)
+# TODO: enable some day (281 offenses)
+Style/TrailingCommaInLiteral:
+  Enabled: False
+
+# Don't think it's feasible to resolve this on spec tests  
+Style/MultilineBlockLayout:
+  Exclude:
+    - 'spec/**/*_spec.rb'
+  
+# Formatting for rspec needs to change then...
+Style/IndentationConsistency:
+  Exclude:
+    - 'spec/**/*_spec.rb'
+  
+# Prefer long form over compact - Not accepted by Puppet community
+Style/ClassAndModuleChildren:
+  Enabled: False
+
+# 'String' unless variable interpolation. Same as Puppet Lint !
+# TODO: enable some day (829 offenses)
+Style/StringLiterals:  
+  Enabled: False
+
+# Class and Module don't like underscore and prefer ClassNameWithCamelCase
+# TODO - FIX on SNMP Backend (HIERA) - triple check this first before deploying...
+Style/ClassAndModuleCamelCase:
+  Enabled: False
+
+# Whitespace issues
+# TODO: enable some day (161 offenses)
+Style/CommentIndentation:
+  Enabled: False
+  
+# TODO: enable some day (425 offenses)
+Style/LeadingCommentSpace:
+  Enabled: False
+
+# TODO: enable some day (154 offenses)
+Style/IndentationWidth:
+  Enabled: False
+
+# TODO: auto resolve (3741 offenses)
+Style/TrailingWhitespace:
+  Enabled: False
+
+# TODO: auto resolve (501 offenses)
+Style/Tab:
+  Enabled: False
+
+# Lint - Argument is not used by method  
+# What about implementing interfaces? Sometimes will be used by calling class. Not a standalone project...
+Lint/UnusedMethodArgument:
+  Enabled: False  
+       
+# Lint - Alignment of end with do?
+# TODO: enable some day (94 offenses)
+Lint/BlockAlignment:
+  Enabled: False
+  
+# Metrics
+Metrics/ParameterLists:
+  Max: 10
+  
+Metrics/BlockNesting:
+  Max: 5
+
+Metrics/AbcSize:
+  Enabled: False
+
+# TODO - Fine tune this?
+Metrics/ClassLength:
+  Max: 450
+
+Metrics/MethodLength:
+  Max: 200
+
+Metrics/BlockLength:
+  Max: 200
+
+Metrics/LineLength:
+  Max: 200
+
+# TODO - Review this later
+Metrics/PerceivedComplexity:
+  Enabled: False
+
+Metrics/CyclomaticComplexity:
+  Enabled: False

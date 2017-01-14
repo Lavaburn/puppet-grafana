@@ -1,7 +1,7 @@
 class Puppet::Provider::Cli < Puppet::Provider
   desc "grafana-cli calls"
     
-  def initialize(value={})
+  def initialize(value = {})
     super(value)
     @property_flush = {} 
   end
@@ -20,21 +20,21 @@ class Puppet::Provider::Cli < Puppet::Provider
           
   def self.prefetch(resources)        
     instances.each do |prov|
-      if resource = resources[prov.name]
+      if (resource = resources[prov.name])
        resource.provider = prov
       end
     end
   end  
 
   def self.cli(*args) 
-    argList = ""
+    arg_list = ""
     args.each do |arg|
-      argList += " "+arg
+      arg_list += " "+arg
     end
         
-    result = %x{grafana-cli plugins #{argList}}
+    result = `grafana-cli plugins #{arg_list}`
     
-    if $?.success?
+    if $CHILD_STATUS.success?
       Puppet.debug("grafana-cli returned: #{result}")
       result
     else

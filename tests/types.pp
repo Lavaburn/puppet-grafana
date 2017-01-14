@@ -47,8 +47,10 @@
 ##  is_default        => true,
 #}
 
+# This checks the file version.
+# New files will be at version 0 (???)
 #grafana_dashboard { 'BIND9 DNS_RCS':
-#  ensure         => latest,           # Keep managing the dashboard version    => Checks File version. CAREFUL !! NEW upload => VERSION = 0 (ALWAYS)
+#  ensure         => latest,
 #  dashboard_name => "BIND9 DNS",
 #  organisation   => 'RCS',
 #}

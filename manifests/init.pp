@@ -75,11 +75,11 @@ class grafana (
   $manage_package_repo = $::grafana::params::manage_package_repo,
   $package_name        = $::grafana::params::package_name,
   $package_source      = $::osfamily ? {
-    /(RedHat|Amazon)/ => "https://grafanarel.s3.amazonaws.com/builds/grafana-${version}-${rpm_iteration}.x86_64.rpm",
+    /(RedHat|Amazon)/ => "https://grafanarel.s3.amazonaws.com/builds/grafana-${version}.x86_64.rpm",
     'Debian'          => "https://grafanarel.s3.amazonaws.com/builds/grafana_${version}_amd64.deb",
     default           => $archive_source,
   },
-  $rpm_iteration       = $::grafana::params::rpm_iteration,
+#  $rpm_iteration       = $::grafana::params::rpm_iteration,
   $apt_os              = $::grafana::params::apt_os,
   $apt_release         = $::grafana::params::apt_release,
   $service_name        = $::grafana::params::service_name,
