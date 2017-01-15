@@ -31,7 +31,7 @@ Puppet::Type.type(:grafana_organisation).provide :rest, :parent => Puppet::Provi
     
     unless list.nil?
       list.each do |object|
-        map = getOrganisation(object)
+        map = organisation_from_map(object)
         unless map.nil?
           #Puppet.debug "Organisation FOUND: "+map.inspect
           result.push(new(map))
@@ -42,7 +42,7 @@ Puppet::Type.type(:grafana_organisation).provide :rest, :parent => Puppet::Provi
     result 
   end
     
-  def self.get_organisation(object)   
+  def self.organisation_from_map(object)   
     return if object["name"].nil? 
     
     {

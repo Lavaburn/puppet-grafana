@@ -26,7 +26,7 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
     unless orgs.nil?
       orgs.each do |org|
         org_id = org["id"].to_s
-        #Puppet.debug "DS_PREFETCH - ORG = "+orgId
+        #Puppet.debug "DS_PREFETCH - ORG = "+org_id
         
         http_post("user/using/#{org_id}")
         
@@ -62,12 +62,13 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
       :database           => object["database"],   
       :basicauth          => object["basicAuth"],   
       :basicauth_user     => object["basicAuthUser"],   
-      :basicauth_password => object["basicAuthPassword"],   
+      :basicauth_password => object["basicAuthPassword"],
+      :json_data          => object["jsonData"],
+      :secure_json_data   => object["secureJsonFields"],
       :is_default         => object["isDefault"],   
       :organisation       => organisation,
       :id                 => object["id"],
       :orgId              => object["orgId"],
-      :json_data          => object["jsonData"],
       :ensure             => :present
     }
   end
@@ -93,6 +94,8 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
       :basicAuth          => resource[:basicauth],
       :basicAuthUser      => resource[:basicauth_user],
       :basicAuthPassword  => resource[:basicauth_password],
+      :jsonData           => resource[:json_data],
+      :secureJsonFields   => resource[:secure_json_data],
       :isDefault          => resource[:is_default],
     }
     
@@ -121,7 +124,7 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
     # name is the ID in Puppet - Can't update that...
     params = {
       :id                 => @property_hash[:id],
-      :orgId              => orgId,
+      :orgId              => org_id,
       :name               => resource[:datasource_name], 
       :type               => resource[:type],  
       :access             => resource[:access],  
@@ -132,6 +135,8 @@ Puppet::Type.type(:grafana_datasource).provide :rest, :parent => Puppet::Provide
       :basicAuth          => resource[:basicauth],
       :basicAuthUser      => resource[:basicauth_user],
       :basicAuthPassword  => resource[:basicauth_password],
+      :jsonData           => resource[:json_data],
+      :secureJsonFields   => resource[:secure_json_data],
       :isDefault          => resource[:is_default],
     }
 

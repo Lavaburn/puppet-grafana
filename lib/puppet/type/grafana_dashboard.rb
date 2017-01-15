@@ -21,7 +21,7 @@ Puppet::Type.newtype(:grafana_dashboard) do
 #            return false if is == :absent
 #            
 #            begin
-#              @version = provider.getFileVersion
+#              @version = provider.get_file_version
 #            rescue => detail
 #              raise "Could not retrieve the file version of the dashboard"
 #            end

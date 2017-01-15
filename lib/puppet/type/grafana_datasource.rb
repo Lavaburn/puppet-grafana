@@ -54,7 +54,15 @@ Puppet::Type.newtype(:grafana_datasource) do
   newparam(:basicauth_password) do
     desc "HTTP Basic Authentication Password"
   end
-    
+
+  newparam(:json_data) do
+    desc "Extra data (usually hash) for configuring new datasources (used by Elasticsearch)"
+  end
+
+  newparam(:secure_json_data) do
+    desc "Extra [secure] data (usually hash) for configuring new datasources (used by Elasticsearch)"
+  end
+      
   newproperty(:is_default) do
     desc "Whether the datasource is the default"
     defaultto false

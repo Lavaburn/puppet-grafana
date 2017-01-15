@@ -86,7 +86,7 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
     Puppet.debug "Switch context: ORG = #{org_id}"
     self.class.http_post("user/using/#{org_id}")
     
-    dashboard = loadDashboard
+    dashboard = load_dashboard
     dashboard["id"] = nil
     
     params = {         
@@ -112,7 +112,7 @@ Puppet::Type.type(:grafana_dashboard).provide :rest, :parent => Puppet::Provider
   def load_dashboard
     Puppet.debug "Loading Dashboard from file " + resource[:organisation] + "/" + resource[:dashboard_name]
       
-    rest = self.class.get_rest_info
+    rest = self.class.rest_info
     folder = rest[:dashboards_folder]
     subfolder = folder + '/' + resource[:organisation]
     file = subfolder + '/' + resource[:dashboard_name]+'.json'
