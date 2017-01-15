@@ -1,6 +1,6 @@
 class Puppet::Provider::Cli < Puppet::Provider
   desc "grafana-cli calls"
-    
+
   def initialize(value = {})
     super(value)
     @property_flush = {} 

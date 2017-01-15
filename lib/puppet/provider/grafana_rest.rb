@@ -9,9 +9,6 @@ end
 class Puppet::Provider::Rest < Puppet::Provider
   desc "Grafana API REST calls"
   
-  confine :feature => :json
-  confine :feature => :rest_client
-  
   def initialize(value = {})
     super(value)
     @property_flush = {} 
@@ -20,7 +17,9 @@ class Puppet::Provider::Rest < Puppet::Provider
   def self.rest_info
     config_file = "/etc/grafana/api.yaml"
     
-    data = File.read(config_file) || raise("Could not read setting file #{config_file}")    
+    raise("Could not read setting file #{config_file}") unless File.exist?(config_file)
+    
+    data = File.read(config_file)
     yamldata = YAML.load(data)
         
     ip = yamldata.include?('ip') ? yamldata['ip'] : '127.0.0.1'

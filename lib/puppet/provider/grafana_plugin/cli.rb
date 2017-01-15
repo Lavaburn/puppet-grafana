@@ -2,6 +2,8 @@ require File.join(File.dirname(__FILE__), '..', 'grafana_cli')
 
 Puppet::Type.type(:grafana_plugin).provide :cli, :parent => Puppet::Provider::Cli do
   desc "Provider for Grafana Plugin"
+
+  confine feature: :grafana_cli
   
   mk_resource_methods
 

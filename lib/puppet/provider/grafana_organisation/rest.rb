@@ -3,6 +3,10 @@ require File.join(File.dirname(__FILE__), '..', 'grafana_rest')
 Puppet::Type.type(:grafana_organisation).provide :rest, :parent => Puppet::Provider::Rest do
   desc "REST provider for Grafana Organisation"
   
+  confine :feature => :json
+  confine :feature => :rest_client
+  confine :feature => :api_config
+  
   mk_resource_methods
 
   def flush  

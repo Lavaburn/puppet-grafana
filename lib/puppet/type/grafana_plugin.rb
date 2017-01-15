@@ -18,7 +18,8 @@ Puppet::Type.newtype(:grafana_plugin) do
     desc "The plugin version. (Only supported from v.4.0.0)"
   end
   
-  autonotify(:service) do
-    ['grafana-server']
-  end
+  # This creates a WRONG dependency loop. Requires install before Service, which is impossible.
+#  autonotify(:service) do
+#    ['grafana-server']
+#  end
 end
