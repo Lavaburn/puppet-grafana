@@ -142,7 +142,7 @@ Metrics/MethodLength:
   Max: 200
 
 Metrics/BlockLength:
-  Max: 200
+  Max: 500
 
 Metrics/LineLength:
   Max: 200
@@ -162,4 +162,12 @@ RSpec/ImplicitExpect:
   Enabled: False
   
 RSpec/NestedGroups:
+  Enabled: False
+
+# For now not worth it...
+Performance/HashEachMethods:
+  Enabled: False
+
+# Not supported by Eclipse
+Style/SymbolArray:
   Enabled: False

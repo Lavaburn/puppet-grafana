@@ -20,7 +20,7 @@ class Puppet::Provider::Rest < Puppet::Provider
     raise("Could not read setting file #{config_file}") unless File.exist?(config_file)
     
     data = File.read(config_file)
-    yamldata = YAML.load(data)
+    yamldata = YAML.safe_load(data)
         
     ip = yamldata.include?('ip') ? yamldata['ip'] : '127.0.0.1'
     port = yamldata.include?('port') ? yamldata['port'] : '3000'
@@ -63,15 +63,15 @@ class Puppet::Provider::Rest < Puppet::Provider
     end
   end  
    
-  def self.get_objects(url, resultName = nil)    
+  def self.get_objects(url, result_name = nil)
     #Puppet.debug "GRAFANA-API (generic) get_objects: #{url}"
     
     response = http_get(url)
       
     #Puppet.debug("Call to #{url} on Grafana API returned #{response}")
     
-    return response if resultName.nil?   
-    response[resultName]
+    return response if result_name.nil?   
+    response[result_name]
   end
   
   def self.http_get(url) 
@@ -124,11 +124,8 @@ class Puppet::Provider::Rest < Puppet::Provider
   def self.http_json(method, url, headers = {}, data = {}, insecure = false)    
     #Puppet.debug "GRAFANA-API (http_json) #{method}: #{url}"
 
-    if insecure
-      verify_ssl = false
-    else
-      verify_ssl = true
-    end
+    verify_ssl = true
+    verify_ssl = false if insecure
     
     begin
       case method
@@ -145,14 +142,14 @@ class Puppet::Provider::Rest < Puppet::Provider
       else
         raise "GRAFANA-API - Invalid Method: #{method}"
       end
-    rescue => e
+    rescue RestClient::RequestFailed => e
       Puppet.debug "GRAFANA API response: "+e.inspect
       raise "Unable to contact GRAFANA API on #{url}: #{e.response}"
     end
   
     begin
       response_json = JSON.parse(response)
-    rescue
+    rescue JSON::ParserError
       raise "Could not parse the JSON response from GRAFANA API: #{response}"
     end
     
@@ -162,11 +159,8 @@ class Puppet::Provider::Rest < Puppet::Provider
   def self.login
     rest = rest_info
 
-    if rest[:insecure]
-      verify_ssl = false
-    else
-      verify_ssl = true
-    end
+    verify_ssl = true
+    verify_ssl = false if rest[:insecure]
     
     # API Token (Limits functionality severaly, as API Tokens are limited to 1 Organisation => BREAKS CODE RIGHT NOW !! (/orgs, /users endpoints don't exist with this type of AUTH (?) )
     return { :Authorization => "Bearer #{rest[:api_key]}" } if rest[:user].nil?
@@ -234,7 +228,7 @@ class Puppet::Provider::Rest < Puppet::Provider
     file = "/tmp/grafana_cookie.yaml"    
     return {} unless File.exist?(file)    
     return {} unless (data = File.read(file)) 
-    yamldata = YAML.load(data)
+    yamldata = YAML.safe_load(data)
  
     if yamldata.include?('grafana_user') && yamldata.include?('grafana_sess') && yamldata.include?('grafana_remember')  
       grafana_user = yamldata['grafana_user']
