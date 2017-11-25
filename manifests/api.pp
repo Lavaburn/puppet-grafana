@@ -14,11 +14,13 @@
 # Nicolas Truyens <nicolas@truyens.com>
 #
 class grafana::api (
-  $password,
-  $host              = '127.0.0.1',
-  $port              = 3000,
-  $username          = 'admin',
-  $dashboards_folder = '/tmp/grafana-dashboards',
+  String $password,
+  String $host              = '127.0.0.1',
+  Integer $port              = 3000,
+  Boolean $enable_tls       = false,
+  Boolean $insecure         = false,
+  String $username          = 'admin',
+  String $dashboards_folder = '/tmp/grafana-dashboards',
 ) {
   validate_string($username, $password)
   validate_string($host)

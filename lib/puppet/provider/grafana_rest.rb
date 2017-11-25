@@ -24,8 +24,10 @@ class Puppet::Provider::Rest < Puppet::Provider
         
     ip = yamldata.include?('ip') ? yamldata['ip'] : '127.0.0.1'
     port = yamldata.include?('port') ? yamldata['port'] : '3000'
+    protocol = yamldata.include?('protocol') ? yamldata['protocol'] : 'http'
+    insecure = yamldata.include?('insecure') ? yamldata['insecure'] : false
     
-    result = { :ip => ip, :port => port }
+    result = { :protocol => protocol, :ip => ip, :port => port, :insecure => insecure }
     
     if yamldata.include?('user') && yamldata.include?('password')
       result[:user] = yamldata['user']
@@ -104,35 +106,42 @@ class Puppet::Provider::Rest < Puppet::Provider
     #Puppet.debug "GRAFANA-API HTTP #{method}: #{url}"
     
     rest = rest_info
-    base_url = "http://#{rest[:ip]}:#{rest[:port]}/api/#{url}"
+        
+    base_url = "#{rest[:protocol]}://#{rest[:ip]}:#{rest[:port]}/api/#{url}"
     headers = login
     if send_json
       headers[:content_type] = :json
       headers[:accept] = :json
     end
     
-    response = http_json(method, base_url, headers, data)
+    response = http_json(method, base_url, headers, data, rest[:insecure])
     
     #Puppet.debug "GRAFANA API - #{method} on #{url} returned: #{response}"
     
     response    
   end
   
-  def self.http_json(method, url, headers = {}, data = {})    
+  def self.http_json(method, url, headers = {}, data = {}, insecure = false)    
     #Puppet.debug "GRAFANA-API (http_json) #{method}: #{url}"
+
+    if insecure
+      verify_ssl = false
+    else
+      verify_ssl = true
+    end
     
     begin
       case method
       when 'GET'
-        response = RestClient.get url, headers         
-      when 'POST'        
-        response = RestClient.post url, data, headers        
+        response = RestClient::Request.execute(method: :get, url: url, headers: headers, verify_ssl: verify_ssl)
+      when 'POST'   
+        response = RestClient::Request.execute(method: :post, url: url, headers: headers, payload: data, verify_ssl: verify_ssl)
       when 'PUT'
-        response = RestClient.put url, data, headers
+        response = RestClient::Request.execute(method: :put, url: url, headers: headers, payload: data, verify_ssl: verify_ssl)
       when 'PATCH'
-        response = RestClient.patch url, data, headers
+        response = RestClient::Request.execute(method: :patch, url: url, headers: headers, payload: data, verify_ssl: verify_ssl)
       when 'DELETE'
-        response = RestClient.delete url, headers         
+        response = RestClient::Request.execute(method: :delete, url: url, headers: headers, verify_ssl: verify_ssl)
       else
         raise "GRAFANA-API - Invalid Method: #{method}"
       end
@@ -153,17 +162,24 @@ class Puppet::Provider::Rest < Puppet::Provider
   def self.login
     rest = rest_info
 
+    if rest[:insecure]
+      verify_ssl = false
+    else
+      verify_ssl = true
+    end
+    
     # API Token (Limits functionality severaly, as API Tokens are limited to 1 Organisation => BREAKS CODE RIGHT NOW !! (/orgs, /users endpoints don't exist with this type of AUTH (?) )
     return { :Authorization => "Bearer #{rest[:api_key]}" } if rest[:user].nil?
     
     # Admin Login - Session Cookie      
-    base_url = "http://#{rest[:ip]}:#{rest[:port]}"
+    base_url = "#{rest[:protocol]}://#{rest[:ip]}:#{rest[:port]}"
     
     cookies = read_cookie
               
     # Ping (test if logged in)
     cookie_header = { :cookies => cookies }
-    RestClient.get("#{base_url}/api/login/ping", cookie_header) do |response, _request, _result, _block|
+
+    RestClient::Request.execute(method: :get, url: "#{base_url}/api/login/ping", headers: cookie_header, verify_ssl: verify_ssl) do |response, _request, _result, _block|
       case response.code
       when 200
         #Puppet.debug "Login cookie is still valid"
@@ -184,7 +200,8 @@ class Puppet::Provider::Rest < Puppet::Provider
     end
 
     # Login
-    RestClient.post("#{base_url}/login", { "user" => rest[:user], "password" => rest[:password] }) do |response, _request, _result, _block|
+    data = { "user" => rest[:user], "password" => rest[:password] }
+    RestClient::Request.execute(method: :post, url: "#{base_url}/login", payload: data, verify_ssl: verify_ssl) do |response, _request, _result, _block|
       case response.code
       when 200
         #Puppet.debug "Login done. Using new cookie data. #{response.cookies.inspect}"

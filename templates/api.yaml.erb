@@ -1,6 +1,12 @@
 ---
 ip: "<%= @api_host %>"
 port: "<%= @api_port %>"
+<%- if @enable_tls -%>
+protocol: "https"
+<%- end -%>
+<%- if @insecure -%>
+insecure: true
+<%- end -%>
 user: "<%= @admin_user %>"
 password: "<%= @admin_password %>"
 dashboards_folder: "<%= @dashboards_folder %>"
