@@ -171,3 +171,7 @@ Performance/HashEachMethods:
 # Not supported by Eclipse
 Style/SymbolArray:
   Enabled: False
+
+# Too complicated. Not really wanted anyway...
+RSpec/ContextWording:
+  Enabled: False

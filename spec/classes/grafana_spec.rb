@@ -238,12 +238,14 @@ describe 'grafana' do
           ensure => present,
         }'
       }
+
       describe 'do NOT create grafana user' do
         it { should_not contain_user('grafana').with_ensure('present').with_home(install_dir) }
       end
     end
 
     context 'when service already defined' do
+      # let(:params) {{ :service_name => 'grafana-server'}}
       let(:pre_condition) {
         'service{"grafana-server":
           ensure     => running,
@@ -251,7 +253,7 @@ describe 'grafana' do
           hasstatus  => true,
         }'
       }
-      # let(:params) {{ :service_name => 'grafana-server'}}
+
       describe 'do NOT run service' do
         it { should_not contain_service('grafana-server').with_hasrestart(false).with_hasstatus(false) }
       end
