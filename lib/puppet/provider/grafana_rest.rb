@@ -168,8 +168,7 @@ class Puppet::Provider::Rest < Puppet::Provider
     # Admin Login - Session Cookie      
     base_url = "#{rest[:protocol]}://#{rest[:ip]}:#{rest[:port]}"
     
-#    cookies = read_cookie
-    cookie_jar = get_cookies
+    cookie_jar = load_cookies
               
     # Ping (test if logged in)
     cookie_header = { :cookies => cookie_jar }
@@ -205,7 +204,7 @@ class Puppet::Provider::Rest < Puppet::Provider
     {} 
   end
 
-  def self.get_cookies
+  def self.load_cookies
     # Puppet.debug "Read cookie from file"
     
     filename = "/tmp/grafana_cookiejar.txt"

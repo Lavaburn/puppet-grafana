@@ -30,7 +30,7 @@ Style/IfInsideElse:
 
 # Style - Whitespace
 # TODO: enable (54 offenses)
-Style/TrailingBlankLines:
+Layout/TrailingBlankLines:
   Enabled: False
 
 # Style - Hash - Ruby 2.0
@@ -38,11 +38,11 @@ Style/TrailingBlankLines:
 Style/HashSyntax:
   Enabled: False
 # Should be resolved by the above...
-Style/IndentHash:
+Layout/IndentHash:
   Enabled: False
 
 # What about alignment? Test with above fixed...
-Style/SpaceAroundOperators:
+Layout/SpaceAroundOperators:
   Enabled: False
 
 # Style {} (single-line) vs. do...end (multi-line)
@@ -56,7 +56,7 @@ Style/BracesAroundHashParameters:
   Enabled: False
 
 # TODO: enable AFTER changing rspec to facts generic (164-x offenses)
-Style/SpaceInsideBlockBraces:
+Layout/SpaceInsideBlockBraces:
   Enabled: False
 
 # Style - prefer %w(a, b, c) over ['a', 'b', 'c'] 
@@ -66,16 +66,19 @@ Style/WordArray:
   
 # Style - last item in hash/array should not have a comma (some DSl enforce this)
 # TODO: enable some day (281 offenses)
-Style/TrailingCommaInLiteral:
+Style/TrailingCommaInArrayLiteral:
+  Enabled: False
+
+Style/TrailingCommaInHashLiteral:
   Enabled: False
 
 # Don't think it's feasible to resolve this on spec tests  
-Style/MultilineBlockLayout:
+Layout/MultilineBlockLayout:
   Exclude:
     - 'spec/**/*_spec.rb'
   
 # Formatting for rspec needs to change then...
-Style/IndentationConsistency:
+Layout/IndentationConsistency:
   Exclude:
     - 'spec/**/*_spec.rb'
   
@@ -90,28 +93,28 @@ Style/StringLiterals:
 
 # Class and Module don't like underscore and prefer ClassNameWithCamelCase
 # TODO - FIX on SNMP Backend (HIERA) - triple check this first before deploying...
-Style/ClassAndModuleCamelCase:
+Naming/ClassAndModuleCamelCase:
   Enabled: False
 
 # Whitespace issues
 # TODO: enable some day (161 offenses)
-Style/CommentIndentation:
+Layout/CommentIndentation:
   Enabled: False
   
 # TODO: enable some day (425 offenses)
-Style/LeadingCommentSpace:
+Layout/LeadingCommentSpace:
   Enabled: False
 
 # TODO: enable some day (154 offenses)
-Style/IndentationWidth:
+Layout/IndentationWidth:
   Enabled: False
 
 # TODO: auto resolve (3741 offenses)
-Style/TrailingWhitespace:
+Layout/TrailingWhitespace:
   Enabled: False
 
 # TODO: auto resolve (501 offenses)
-Style/Tab:
+Layout/Tab:
   Enabled: False
 
 # Lint - Argument is not used by method  
@@ -121,7 +124,7 @@ Lint/UnusedMethodArgument:
        
 # Lint - Alignment of end with do?
 # TODO: enable some day (94 offenses)
-Lint/BlockAlignment:
+Layout/BlockAlignment:
   Enabled: False
   
 # Metrics
@@ -162,10 +165,6 @@ RSpec/ImplicitExpect:
   Enabled: False
   
 RSpec/NestedGroups:
-  Enabled: False
-
-# For now not worth it...
-Performance/HashEachMethods:
   Enabled: False
 
 # Not supported by Eclipse
