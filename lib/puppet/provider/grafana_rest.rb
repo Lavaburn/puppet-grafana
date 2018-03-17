@@ -122,7 +122,7 @@ class Puppet::Provider::Rest < Puppet::Provider
   end
   
   def self.http_json(method, url, headers = {}, data = {}, insecure = false)    
-    #Puppet.debug "GRAFANA-API (http_json) #{method}: #{url}"
+    # Puppet.debug "GRAFANA-API (http_json) #{method}: #{url}"
 
     verify_ssl = true
     verify_ssl = false if insecure
@@ -162,32 +162,25 @@ class Puppet::Provider::Rest < Puppet::Provider
     verify_ssl = true
     verify_ssl = false if rest[:insecure]
     
-    # API Token (Limits functionality severaly, as API Tokens are limited to 1 Organisation => BREAKS CODE RIGHT NOW !! (/orgs, /users endpoints don't exist with this type of AUTH (?) )
+    # API Token (Limits functionality severily, as API Tokens are limited to 1 Organisation => BREAKS CODE RIGHT NOW !! (/orgs, /users endpoints don't exist with this type of AUTH (?) )
     return { :Authorization => "Bearer #{rest[:api_key]}" } if rest[:user].nil?
     
     # Admin Login - Session Cookie      
     base_url = "#{rest[:protocol]}://#{rest[:ip]}:#{rest[:port]}"
     
-    cookies = read_cookie
+#    cookies = read_cookie
+    cookie_jar = get_cookies
               
     # Ping (test if logged in)
-    cookie_header = { :cookies => cookies }
+    cookie_header = { :cookies => cookie_jar }
 
     RestClient::Request.execute(method: :get, url: "#{base_url}/api/login/ping", headers: cookie_header, verify_ssl: verify_ssl) do |response, _request, _result, _block|
       case response.code
       when 200
-        #Puppet.debug "Login cookie is still valid"
-                  
-        # COOKIE STILL VALID          
-        grafana_user = cookies[:grafana_user]
-        grafana_sess = cookies[:grafana_sess]
-        grafana_remember = cookies[:grafana_remember]
-          
-        return { :cookies => { 
-          :grafana_user => grafana_user, 
-          :grafana_sess => grafana_sess, 
-          :grafana_remember => grafana_remember 
-        } } 
+        # Puppet.debug "Login cookie is still valid"
+
+        store_cookies(response.cookie_jar)          
+        return { :cookies => response.cookie_jar }
       else
         raise "Unexpected response on API Login PING:" unless response.code == 401
       end
@@ -198,20 +191,10 @@ class Puppet::Provider::Rest < Puppet::Provider
     RestClient::Request.execute(method: :post, url: "#{base_url}/login", payload: data, verify_ssl: verify_ssl) do |response, _request, _result, _block|
       case response.code
       when 200
-        #Puppet.debug "Login done. Using new cookie data. #{response.cookies.inspect}"
+        # Puppet.debug "Login done. Using new cookie data. #{response.cookies.inspect}"
         
-        # LOGIN OK
-        grafana_user = response.cookies["grafana_user"]
-        grafana_sess = response.cookies["grafana_sess"]
-        grafana_remember = response.cookies["grafana_remember"]
-          
-        write_cookie(grafana_user, grafana_sess, grafana_remember)
-                               
-        return { :cookies => {
-          :grafana_user => grafana_user, 
-          :grafana_sess => grafana_sess, 
-          :grafana_remember => grafana_remember
-        } } 
+        store_cookies(response.cookie_jar)                               
+        return { :cookies => response.cookie_jar }
       when 401
         raise "Invalid Authentication in Grafana REST API Config File [TODO]"
       else
@@ -220,38 +203,28 @@ class Puppet::Provider::Rest < Puppet::Provider
     end
     
     {} 
-  end    
-  
-  def self.read_cookie
-    #Puppet.debug "Read cookie from file"
-    
-    file = "/tmp/grafana_cookie.yaml"    
-    return {} unless File.exist?(file)    
-    return {} unless (data = File.read(file)) 
-    yamldata = YAML.safe_load(data)
- 
-    if yamldata.include?('grafana_user') && yamldata.include?('grafana_sess') && yamldata.include?('grafana_remember')  
-      grafana_user = yamldata['grafana_user']
-      grafana_sess = yamldata['grafana_sess']
-      grafana_remember = yamldata['grafana_remember']
-      return { :grafana_user => grafana_user, :grafana_sess => grafana_sess, :grafana_remember => grafana_remember }
-    end
-    
-    {}
   end
-  
-  def self.write_cookie(grafana_user, grafana_sess, grafana_remember)
-    #Puppet.debug "Write cookie to file"
+
+  def self.get_cookies
+    # Puppet.debug "Read cookie from file"
     
-    file = "/tmp/grafana_cookie.yaml"
+    filename = "/tmp/grafana_cookiejar.txt"
+    options = {}
     
-    cookie = YAML::Store.new(file)
-  
-    cookie.transaction do
-      cookie["grafana_user"] = grafana_user
-      cookie["grafana_sess"] = grafana_sess
-      cookie["grafana_remember"] = grafana_remember
-    end
+    cookie_jar = HTTP::CookieJar.new
+    cookie_jar.load(filename, options) if File.exist?(filename)
+    cookie_jar
+  end
+
+  def self.store_cookies(cookie_jar)
+    # Puppet.debug "Write cookie to file"
+    
+    file = "/tmp/grafana_cookiejar.txt"
+    options = {
+      :session => true,
+    }
+    
+    cookie_jar.save(file, options)
   end
   
   def self.generic_lookup(endpoint, lookup_var, lookup_val, return_var)

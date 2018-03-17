@@ -9,15 +9,19 @@ rvm:
   - 2.4.2
 script: bundle exec rake test
 env:
-  - PUPPET_VERSION="~> 4.0.0" STRICT_VARIABLES=yes
-  - PUPPET_VERSION="~> 4.3.2" STRICT_VARIABLES=yes
-  - PUPPET_VERSION="~> 4.8.2" STRICT_VARIABLES=yes
+  - PUPPET_VERSION="~> 4.0.0"
+  - PUPPET_VERSION="~> 4.3.2"
+  - PUPPET_VERSION="~> 4.8.2"
   - PUPPET_VERSION="~> 5.0.1"
   - PUPPET_VERSION="~> 5.3.3"
 matrix:
-  allow_failures:
-    - rvm: 2.4.2
-    - env: PUPPET_VERSION="~> 5.0.1"
+#  allow_failures:
+#    - rvm: 2.4.2
+#      env: PUPPET_VERSION="~> 4.8.2"
+#    - rvm: 2.4.2
+#      env: PUPPET_VERSION="~> 5.0.1"
+#    - rvm: 2.4.2
+#      env: PUPPET_VERSION="~> 5.3.3"
   exclude:
   - rvm: 2.1.9
     env: PUPPET_VERSION="~> 5.0.1"
@@ -31,5 +35,3 @@ matrix:
     env: PUPPET_VERSION="~> 4.0.0"
   - rvm: 2.4.2
     env: PUPPET_VERSION="~> 4.3.2"
-  - rvm: 2.4.2
-    env: PUPPET_VERSION="~> 4.8.2"
